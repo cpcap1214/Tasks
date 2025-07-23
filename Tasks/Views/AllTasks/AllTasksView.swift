@@ -28,7 +28,7 @@ struct AllTasksView: View {
                 taskListView
             }
             .background(AppConstants.Colors.background)
-            .navigationTitle("All Tasks")
+            .navigationTitle("所有任務")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -106,7 +106,7 @@ struct AllTasksView: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(AppConstants.Colors.secondaryText)
                 
-                TextField("Search tasks...", text: $viewModel.searchText)
+                TextField("搜尋任務...", text: $viewModel.searchText)
                     .textFieldStyle(PlainTextFieldStyle())
                 
                 if !viewModel.searchText.isEmpty {
@@ -191,7 +191,7 @@ struct AllTasksView: View {
             
             if !searchTextOrFilter {
                 Button(action: viewModel.startAddingTask) {
-                    Text("Add Your First Task")
+                    Text("新增第一個任務")
                         .font(AppConstants.Fonts.button)
                         .foregroundColor(AppConstants.Colors.background)
                         .padding(.vertical, 16)
@@ -215,21 +215,21 @@ struct AllTasksView: View {
     
     private var emptyStateTitle: String {
         if !viewModel.searchText.isEmpty {
-            return "No Results"
+            return "沒有結果"
         } else if viewModel.selectedFilter != .all {
-            return "No \(viewModel.selectedFilter.displayName) Tasks"
+            return "沒有\(viewModel.selectedFilter.displayName)任務"
         } else {
-            return "No Tasks Yet"
+            return "還沒有任務"
         }
     }
     
     private var emptyStateMessage: String {
         if !viewModel.searchText.isEmpty {
-            return "Try adjusting your search terms or filter settings."
+            return "試試調整搜尋條件或篩選設定"
         } else if viewModel.selectedFilter != .all {
-            return "You don't have any \(viewModel.selectedFilter.displayName.lowercased()) tasks at the moment."
+            return "目前沒有\(viewModel.selectedFilter.displayName.lowercased())任務"
         } else {
-            return "Start by adding your first task to get organized and focused."
+            return "新增第一個任務開始專注工作"
         }
     }
 }

@@ -11,7 +11,7 @@ struct AppConstants {
     
     // MARK: - App Info
     
-    static let appName = "Tasks"
+    static let appName = "Focus"
     static let appVersion = "1.0.0"
     
     // MARK: - Design System (Following DESIGN.md)

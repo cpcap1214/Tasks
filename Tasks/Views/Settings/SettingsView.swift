@@ -237,7 +237,7 @@ struct SettingsView: View {
                     .padding(.vertical, 4)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle("設定")
             .navigationBarTitleDisplayMode(.large)
             .alert("Reset Statistics", isPresented: $showingResetAlert) {
                 Button("Cancel", role: .cancel) { }

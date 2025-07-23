@@ -131,10 +131,10 @@ class TaskListViewModel: ObservableObject {
 // MARK: - Task Filter Enum
 
 enum TaskFilter: String, CaseIterable {
-    case all = "All"
-    case pending = "Pending"
-    case completed = "Completed"
-    case deferred = "Deferred"
+    case all = "全部"
+    case pending = "待辦"
+    case completed = "已完成"
+    case deferred = "已延期"
     
     var displayName: String {
         return self.rawValue

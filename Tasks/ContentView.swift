@@ -16,7 +16,7 @@ struct ContentView: View {
             DashboardView()
                 .tabItem {
                     Image(systemName: selectedTab == 0 ? "house.fill" : "house")
-                    Text("Dashboard")
+                    Text("專注")
                 }
                 .tag(0)
             
@@ -24,7 +24,7 @@ struct ContentView: View {
             AllTasksView()
                 .tabItem {
                     Image(systemName: selectedTab == 1 ? "list.bullet" : "list.bullet")
-                    Text("All Tasks")
+                    Text("所有任務")
                 }
                 .tag(1)
             
@@ -32,7 +32,7 @@ struct ContentView: View {
             SettingsView()
                 .tabItem {
                     Image(systemName: selectedTab == 2 ? "gearshape.fill" : "gearshape")
-                    Text("Settings")
+                    Text("設定")
                 }
                 .tag(2)
         }

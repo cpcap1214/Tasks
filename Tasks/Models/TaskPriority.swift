@@ -16,13 +16,13 @@ enum TaskPriority: Int, CaseIterable, Codable {
     var displayName: String {
         switch self {
         case .low:
-            return "Low"
+            return "低"
         case .normal:
-            return "Normal"
+            return "普通"
         case .high:
-            return "High"
+            return "高"
         case .urgent:
-            return "Urgent"
+            return "緊急"
         }
     }
     
