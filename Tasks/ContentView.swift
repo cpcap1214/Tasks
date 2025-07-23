@@ -8,14 +8,56 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedTab = 0
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView(selection: $selectedTab) {
+            // Dashboard Tab
+            DashboardView()
+                .tabItem {
+                    Image(systemName: selectedTab == 0 ? "house.fill" : "house")
+                    Text("Dashboard")
+                }
+                .tag(0)
+            
+            // All Tasks Tab (replacing Stats)
+            AllTasksView()
+                .tabItem {
+                    Image(systemName: selectedTab == 1 ? "list.bullet" : "list.bullet")
+                    Text("All Tasks")
+                }
+                .tag(1)
+            
+            // Settings Tab
+            SettingsView()
+                .tabItem {
+                    Image(systemName: selectedTab == 2 ? "gearshape.fill" : "gearshape")
+                    Text("Settings")
+                }
+                .tag(2)
         }
-        .padding()
+        .accentColor(AppConstants.Colors.accent)
+        .onAppear {
+            // Configure tab bar appearance following DESIGN.md
+            let appearance = UITabBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = UIColor(AppConstants.Colors.background)
+            
+            // Selected item appearance
+            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
+                .foregroundColor: UIColor(AppConstants.Colors.accent)
+            ]
+            appearance.stackedLayoutAppearance.selected.iconColor = UIColor(AppConstants.Colors.accent)
+            
+            // Normal item appearance
+            appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
+                .foregroundColor: UIColor(AppConstants.Colors.secondaryText)
+            ]
+            appearance.stackedLayoutAppearance.normal.iconColor = UIColor(AppConstants.Colors.secondaryText)
+            
+            UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
     }
 }
 
