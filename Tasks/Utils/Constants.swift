@@ -37,15 +37,15 @@ struct AppConstants {
         static let darkBorder = Color(red: 0.27, green: 0.27, blue: 0.29)
         static let darkDestructive = Color(red: 1.0, green: 0.27, blue: 0.23)
         
-        // Adaptive Colors
-        static let background = Color("BackgroundColor")
-        static let secondaryBackground = Color("SecondaryBackgroundColor")
-        static let cardBackground = Color("CardBackgroundColor")
-        static let primaryText = Color("PrimaryTextColor")
-        static let secondaryText = Color("SecondaryTextColor")
-        static let accent = Color("AccentColor")
-        static let border = Color("BorderColor")
-        static let destructive = Color("DestructiveColor")
+        // Adaptive Colors (Using System Colors for simplicity)
+        static let background = Color(UIColor.systemBackground)
+        static let secondaryBackground = Color(UIColor.secondarySystemBackground)
+        static let cardBackground = Color(UIColor.systemBackground)
+        static let primaryText = Color(UIColor.label)
+        static let secondaryText = Color(UIColor.secondaryLabel)
+        static let accent = Color(UIColor.label)
+        static let border = Color(UIColor.separator)
+        static let destructive = Color(UIColor.systemRed)
     }
     
     struct Fonts {

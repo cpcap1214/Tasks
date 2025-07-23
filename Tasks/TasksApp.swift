@@ -12,6 +12,13 @@ struct TasksApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    // Load sample data for development/testing
+                    // Remove this in production
+                    #if DEBUG
+                    SampleData.setupInitialData()
+                    #endif
+                }
         }
     }
 }

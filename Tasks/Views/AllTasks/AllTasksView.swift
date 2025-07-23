@@ -192,7 +192,12 @@ struct AllTasksView: View {
             if !searchTextOrFilter {
                 Button(action: viewModel.startAddingTask) {
                     Text("Add Your First Task")
-                        .buttonStyle()
+                        .font(AppConstants.Fonts.button)
+                        .foregroundColor(AppConstants.Colors.background)
+                        .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity)
+                        .background(AppConstants.Colors.accent)
+                        .cornerRadius(AppConstants.CornerRadius.button)
                 }
                 .padding(.top, AppConstants.Spacing.contentSpacing)
             }
