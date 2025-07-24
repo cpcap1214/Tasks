@@ -91,11 +91,11 @@ struct AllTasksView: View {
                     )
                 }
                 
-                // Deferred Tasks Section
-                if !viewModel.deferredTasks.isEmpty {
+                // Done This Week Section
+                if !viewModel.doneThisWeek.isEmpty {
                     TaskSectionView(
-                        section: .deferred,
-                        tasks: viewModel.deferredTasks,
+                        section: .doneThisWeek,
+                        tasks: viewModel.doneThisWeek,
                         onTaskAction: handleTaskAction
                     )
                 }
