@@ -11,6 +11,7 @@ struct SettingsView: View {
     @StateObject private var taskService = TaskService.shared
     @State private var showingResetAlert = false
     @State private var showingClearTasksAlert = false
+    @AppStorage("taskRemindersEnabled") private var taskRemindersEnabled = true
     
     var body: some View {
         NavigationView {
@@ -72,29 +73,24 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 ModernSettingsRow(
                     icon: "paintbrush",
-                    title: "Appearance",
+                    title: "外觀設定",
                     showDivider: true
                 ) {
-                    HStack(spacing: 4) {
-                        Text("跟隨系統")
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(AppConstants.Colors.secondaryBackground)
-                    .cornerRadius(8)
+                    Text("跟隨系統")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(AppConstants.Colors.secondaryText)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(AppConstants.Colors.secondaryBackground)
+                        .cornerRadius(8)
                 }
                 
                 ModernSettingsRow(
                     icon: "bell",
-                    title: "Task Reminders",
+                    title: "任務提醒",
                     showDivider: false
                 ) {
-                    Toggle("", isOn: .constant(true))
+                    Toggle("", isOn: $taskRemindersEnabled)
                         .toggleStyle(SwitchToggleStyle())
                 }
             }
@@ -120,32 +116,34 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 ModernSettingsRow(
                     icon: "list.bullet",
-                    title: "Total Tasks",
+                    title: "總任務數",
                     showDivider: true
                 ) {
-                    Text("\(taskService.stats.totalTasksCreated) 個任務")
+                    Text("\(taskService.stats.totalTasksCreated) 個")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(AppConstants.Colors.primaryText)
                 }
                 
                 ModernSettingsRow(
-                    icon: "calendar",
-                    title: "Tasks Completed",
+                    icon: "checkmark.circle",
+                    title: "已完成任務",
                     showDivider: true
                 ) {
-                    Text("\(taskService.stats.tasksCompleted) 已完成")
+                    Text("\(taskService.stats.tasksCompleted) 個")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(AppConstants.Colors.primaryText)
                 }
                 
                 ModernSettingsRow(
                     icon: "chart.line.uptrend.xyaxis",
-                    title: "Completion Rate",
+                    title: "完成率",
                     showDivider: false
                 ) {
-                    Text(String(format: "%.0f%%", taskService.getCompletionRate() * 100))
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(AppConstants.Colors.primaryText)
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(String(format: "%.1f%%", taskService.getCompletionRate() * 100))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(AppConstants.Colors.primaryText)
+                    }
                 }
             }
             .background(AppConstants.Colors.cardBackground)
@@ -183,28 +181,31 @@ struct SettingsView: View {
                 }) {
                     ModernSettingsRow(
                         icon: "trash",
-                        title: "Clear All Tasks",
+                        title: "清除所有任務",
                         showDivider: true
                     ) {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 12))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
+                            .foregroundColor(taskService.tasks.isEmpty ? 
+                                AppConstants.Colors.secondaryText.opacity(0.5) : 
+                                AppConstants.Colors.destructive)
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(taskService.tasks.isEmpty)
+                .opacity(taskService.tasks.isEmpty ? 0.5 : 1.0)
                 
                 Button(action: {
                     showingResetAlert = true
                 }) {
                     ModernSettingsRow(
                         icon: "arrow.clockwise",
-                        title: "Reset Statistics",
+                        title: "重置統計資料",
                         showDivider: false
                     ) {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 12))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
+                            .foregroundColor(AppConstants.Colors.destructive)
                     }
                 }
                 .buttonStyle(PlainButtonStyle())

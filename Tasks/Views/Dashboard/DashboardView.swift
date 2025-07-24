@@ -81,17 +81,25 @@ struct DashboardView: View {
                             viewModel.markCurrentTaskAsCompleted()
                         }
                     }) {
-                        Text("Mark as Done")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 18)
-                            .background(Color.black)
-                            .cornerRadius(16)
+                        HStack(spacing: 8) {
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .scaleEffect(0.8)
+                            }
+                            Text(viewModel.isLoading ? "處理中..." : "完成任務")
+                                .font(.system(size: 18, weight: .semibold))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(viewModel.isLoading ? Color.black.opacity(0.7) : Color.black)
+                        .cornerRadius(16)
                     }
                     .disabled(viewModel.isLoading)
-                    .scaleEffect(viewModel.isLoading ? 0.98 : 1.0)
-                    .animation(AppConstants.Animation.buttonPress, value: viewModel.isLoading)
+                    .scaleEffect(viewModel.isLoading ? 0.95 : 1.0)
+                    .opacity(viewModel.isLoading ? 0.8 : 1.0)
+                    .animation(.easeInOut(duration: 0.2), value: viewModel.isLoading)
                     
                     // Defer Button
                     Button(action: {
@@ -99,19 +107,22 @@ struct DashboardView: View {
                             viewModel.deferCurrentTask()
                         }
                     }) {
-                        Text("Defer")
+                        Text("稍後處理")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(AppConstants.Colors.primaryText)
+                            .foregroundColor(viewModel.isLoading ? AppConstants.Colors.secondaryText : AppConstants.Colors.primaryText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 18)
                             .background(Color.clear)
                             .cornerRadius(16)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .stroke(AppConstants.Colors.border, lineWidth: 1)
+                                    .stroke(viewModel.isLoading ? AppConstants.Colors.border.opacity(0.5) : AppConstants.Colors.border, lineWidth: 1)
                             )
                     }
                     .disabled(viewModel.isLoading)
+                    .opacity(viewModel.isLoading ? 0.6 : 1.0)
+                    .scaleEffect(viewModel.isLoading ? 0.98 : 1.0)
+                    .animation(.easeInOut(duration: 0.2), value: viewModel.isLoading)
                 }
                 .padding(.bottom, 40)
             }
@@ -135,39 +146,49 @@ struct SwipeableFocusCard: View {
     
     var body: some View {
         ZStack {
-            // Background actions
-            if abs(dragOffset.width) > 50 {
+            // Background actions - 更早顯示預覽效果
+            if abs(dragOffset.width) > 30 {
                 HStack {
-                    if dragOffset.width > 50 {
+                    if dragOffset.width > 30 {
                         // Complete action (right swipe)
                         Spacer()
                         VStack(spacing: 8) {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 32))
+                                .font(.system(size: abs(dragOffset.width) > 60 ? 36 : 28))
                                 .foregroundColor(.white)
+                                .scaleEffect(abs(dragOffset.width) > 60 ? 1.1 : 1.0)
                             Text("完成")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(.white)
+                                .opacity(abs(dragOffset.width) > 50 ? 1.0 : 0.7)
                         }
                         .padding(.trailing, 40)
-                    } else if dragOffset.width < -50 {
+                        .animation(.easeOut(duration: 0.1), value: dragOffset.width)
+                    } else if dragOffset.width < -30 {
                         // Defer action (left swipe)
                         VStack(spacing: 8) {
                             Image(systemName: "clock.fill")
-                                .font(.system(size: 32))
+                                .font(.system(size: abs(dragOffset.width) > 60 ? 36 : 28))
                                 .foregroundColor(.white)
-                            Text("延期")
+                                .scaleEffect(abs(dragOffset.width) > 60 ? 1.1 : 1.0)
+                            Text("稍後處理")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(.white)
+                                .opacity(abs(dragOffset.width) > 50 ? 1.0 : 0.7)
                         }
                         .padding(.leading, 40)
+                        .animation(.easeOut(duration: 0.1), value: dragOffset.width)
                         Spacer()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(dragOffset.width > 50 ? .green : .orange)
+                        .fill(dragOffset.width > 30 ? 
+                              (dragOffset.width > 0 ? .green : .orange) : 
+                              .clear)
+                        .opacity(min(abs(dragOffset.width) / 100, 0.9))
+                        .animation(.easeOut(duration: 0.1), value: dragOffset.width)
                 )
             }
             
@@ -231,18 +252,22 @@ struct SwipeableFocusCard: View {
                         dragOffset = value.translation
                     }
                     .onEnded { value in
-                        let threshold: CGFloat = 120
+                        let threshold: CGFloat = 80  // 降低閾值使滑動更容易觸發
                         
                         if value.translation.width > threshold {
-                            // Complete task
+                            // Complete task with haptic feedback
+                            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                            impactFeedback.impactOccurred()
                             onComplete()
                         } else if value.translation.width < -threshold {
-                            // Defer task
+                            // Defer task with haptic feedback
+                            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                            impactFeedback.impactOccurred()
                             onDefer()
                         }
                         
-                        // Reset position
-                        withAnimation(.spring()) {
+                        // Reset position with spring animation
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                             dragOffset = .zero
                         }
                     }

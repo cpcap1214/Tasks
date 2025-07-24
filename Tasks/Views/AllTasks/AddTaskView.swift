@@ -18,6 +18,9 @@ struct AddTaskView: View {
     @State private var priority: TaskPriority = .normal
     @State private var hasDueDate = false
     @State private var dueDate = Date()
+    @State private var showValidationError = false
+    @State private var hasUnsavedChanges = false
+    @State private var showingDiscardAlert = false
     
     private var isEditing: Bool {
         initialTask != nil
@@ -55,10 +58,30 @@ struct AddTaskView: View {
                             subtitle: "簡潔描述你要完成什麼",
                             isRequired: true
                         ) {
-                            ModernTextField(
-                                placeholder: "例如：完成項目提案",
-                                text: $title
-                            )
+                            VStack(alignment: .leading, spacing: 8) {
+                                ModernTextField(
+                                    placeholder: "例如：完成項目提案",
+                                    text: $title
+                                )
+                                .onChange(of: title) { newValue in
+                                    hasUnsavedChanges = true
+                                    if showValidationError && !newValue.trimmed.isEmpty {
+                                        showValidationError = false
+                                    }
+                                }
+                                
+                                if showValidationError && title.trimmed.isEmpty {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "exclamationmark.circle.fill")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(AppConstants.Colors.destructive)
+                                        Text("請輸入任務標題")
+                                            .font(.system(size: 12, weight: .medium))
+                                            .foregroundColor(AppConstants.Colors.destructive)
+                                    }
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                }
+                            }
                         }
                         
                         // Description Section  
@@ -70,6 +93,9 @@ struct AddTaskView: View {
                                 placeholder: "例如：準備投影片，包含市場分析和財務預測...",
                                 text: $description
                             )
+                            .onChange(of: description) { _ in
+                                hasUnsavedChanges = true
+                            }
                         }
                         
                         // Priority Section
@@ -78,6 +104,9 @@ struct AddTaskView: View {
                             subtitle: "設定這個任務的重要程度"
                         ) {
                             PrioritySelector(selectedPriority: $priority)
+                                .onChange(of: priority) { _ in
+                                    hasUnsavedChanges = true
+                                }
                         }
                         
                         // Due Date Section
@@ -87,9 +116,15 @@ struct AddTaskView: View {
                         ) {
                             VStack(spacing: 16) {
                                 DueDateToggle(hasDueDate: $hasDueDate)
+                                    .onChange(of: hasDueDate) { _ in
+                                        hasUnsavedChanges = true
+                                    }
                                 
                                 if hasDueDate {
                                     ModernDatePicker(selectedDate: $dueDate)
+                                        .onChange(of: dueDate) { _ in
+                                            hasUnsavedChanges = true
+                                        }
                                 }
                             }
                         }
@@ -108,18 +143,19 @@ struct AddTaskView: View {
                     Button(action: saveTask) {
                         Text(isEditing ? "更新任務" : "建立任務")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(canSave ? AppConstants.Colors.background : AppConstants.Colors.secondaryText)
+                            .foregroundColor(canSave ? AppConstants.Colors.background : AppConstants.Colors.secondaryText.opacity(0.7))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(canSave ? AppConstants.Colors.accent : AppConstants.Colors.secondaryBackground)
+                            .background(canSave ? AppConstants.Colors.accent : AppConstants.Colors.secondaryBackground.opacity(0.5))
                             .cornerRadius(12)
                     }
                     .disabled(!canSave)
                     .scaleEffect(canSave ? 1.0 : 0.95)
-                    .animation(.easeInOut(duration: 0.1), value: canSave)
+                    .opacity(canSave ? 1.0 : 0.6)
+                    .animation(.easeInOut(duration: 0.2), value: canSave)
                     
                     // Cancel Button
-                    Button(action: { dismiss() }) {
+                    Button(action: handleCancel) {
                         Text("取消")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(AppConstants.Colors.primaryText)
@@ -142,6 +178,14 @@ struct AddTaskView: View {
                 loadTaskData(task)
             }
         }
+        .alert("放棄變更？", isPresented: $showingDiscardAlert) {
+            Button("繼續編輯", role: .cancel) { }
+            Button("放棄", role: .destructive) { 
+                dismiss() 
+            }
+        } message: {
+            Text("您有未保存的變更，確定要離開嗎？")
+        }
     }
     
     private func loadTaskData(_ task: Task) {
@@ -155,11 +199,26 @@ struct AddTaskView: View {
     }
     
     private func saveTask() {
+        // Validate before saving
+        guard canSave else {
+            showValidationError = true
+            return
+        }
+        
         let finalDescription = description.trimmed.isEmpty ? nil : description.trimmed
         let finalDueDate = hasDueDate ? dueDate : nil
         
         onSave(title.trimmed, finalDescription, priority, finalDueDate)
+        hasUnsavedChanges = false
         dismiss()
+    }
+    
+    private func handleCancel() {
+        if hasUnsavedChanges && (isEditing || !title.isEmpty || !description.isEmpty) {
+            showingDiscardAlert = true
+        } else {
+            dismiss()
+        }
     }
     
     private func priorityColor(for priority: TaskPriority) -> Color {
@@ -254,7 +313,7 @@ struct ModernTextEditor: View {
                 .foregroundColor(AppConstants.Colors.primaryText)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
-                .frame(minHeight: 100)
+                .frame(minHeight: 100, maxHeight: 200)
                 .scrollContentBackground(.hidden)
         }
         .background(AppConstants.Colors.cardBackground)

@@ -100,8 +100,6 @@ struct AllTasksView: View {
                     )
                 }
                 
-                // JSON Debug View
-                JSONDebugView(tasks: viewModel.allIncompleteTasks)
                 
                 // Add some bottom padding
                 Spacer(minLength: 100)
@@ -252,11 +250,16 @@ struct TaskCard: View {
                     
                     Spacer()
                     
-                    // Priority Indicator
-                    if task.priority == .high || task.priority == .urgent {
+                    // Priority Indicator - 更顯眼的設計
+                    if task.priority != .normal {
                         Circle()
-                            .fill(task.priority == .urgent ? .red : .orange)
-                            .frame(width: 8, height: 8)
+                            .fill(priorityColor(for: task.priority))
+                            .frame(width: task.priority == .urgent ? 12 : 10, 
+                                   height: task.priority == .urgent ? 12 : 10)
+                            .scaleEffect(task.priority == .urgent ? 1.1 : 1.0)
+                            .animation(task.priority == .urgent ? 
+                                .easeInOut(duration: 1.0).repeatForever(autoreverses: true) : 
+                                .none, value: task.priority)
                     }
                 }
                 
@@ -407,71 +410,19 @@ private func daysBetween(from startDate: Date, to endDate: Date) -> Int {
     return components.day ?? 0
 }
 
-// MARK: - JSON Debug View
-
-struct JSONDebugView: View {
-    let tasks: [Task]
-    @State private var isExpanded = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Section Header
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text("JSON 資料檢視")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isExpanded.toggle()
-                        }
-                    }) {
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                Text("所有未完成任務的 JSON 格式資料")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            if isExpanded {
-                ScrollView {
-                    Text(jsonString)
-                        .font(.system(size: 12, weight: .regular, design: .monospaced))
-                        .foregroundColor(.primary)
-                        .textSelection(.enabled)
-                        .padding(16)
-                        .background(AppConstants.Colors.secondaryBackground)
-                        .cornerRadius(8)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(maxHeight: 300)
-                .transition(.opacity.combined(with: .scale))
-            }
-        }
-        .padding(.horizontal, 20)
-    }
-    
-    private var jsonString: String {
-        do {
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            encoder.dateEncodingStrategy = .iso8601
-            
-            let jsonData = try encoder.encode(tasks)
-            return String(data: jsonData, encoding: .utf8) ?? "JSON encoding failed"
-        } catch {
-            return "Error encoding JSON: \(error.localizedDescription)"
-        }
+private func priorityColor(for priority: TaskPriority) -> Color {
+    switch priority {
+    case .low:
+        return .green
+    case .normal:
+        return .blue
+    case .high:
+        return .orange
+    case .urgent:
+        return .red
     }
 }
+
 
 // MARK: - Preview
 
