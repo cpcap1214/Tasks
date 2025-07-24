@@ -27,59 +27,20 @@ struct DashboardView: View {
                 if let currentTask = viewModel.currentTask {
                     // Current Task Card - 更卡片化的設計
                     VStack(spacing: AppConstants.Spacing.contentSpacing) {
-                        // Task Content Card
-                        VStack(spacing: AppConstants.Spacing.contentSpacing) {
-                            // Priority indicator (if high/urgent)
-                            if currentTask.priority == .high || currentTask.priority == .urgent {
-                                HStack {
-                                    Text(currentTask.priority.displayName)
-                                        .font(.system(size: 12, weight: .semibold))
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 4)
-                                        .background(currentTask.priority == .urgent ? Color.red : Color.orange)
-                                        .cornerRadius(12)
-                                    
-                                    Spacer()
+                        // Swipeable Task Content Card
+                        SwipeableFocusCard(
+                            task: currentTask,
+                            onComplete: {
+                                withAnimation(AppConstants.Animation.stateChange) {
+                                    viewModel.markCurrentTaskAsCompleted()
+                                }
+                            },
+                            onDefer: {
+                                withAnimation(AppConstants.Animation.stateChange) {
+                                    viewModel.deferCurrentTask()
                                 }
                             }
-                            
-                            // Task Title - 更突出
-                            Text(currentTask.title)
-                                .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(AppConstants.Colors.primaryText)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(nil)
-                                .padding(.horizontal, 20)
-                            
-                            // Task Description (if available)
-                            if let description = currentTask.description, !description.isEmpty {
-                                Text(description)
-                                    .font(.system(size: 16, weight: .regular))
-                                    .foregroundColor(AppConstants.Colors.secondaryText)
-                                    .multilineTextAlignment(.center)
-                                    .lineLimit(nil)
-                                    .padding(.horizontal, 20)
-                            }
-                            
-                            // Due Date (if set) - 更subtle
-                            if let dueDate = currentTask.dueDate {
-                                Text(dueDate.shortDateString)
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(dueDate.daysFromNow() <= 1 && dueDate.daysFromNow() >= 0 ? Color.red : AppConstants.Colors.secondaryText)
-                                    .padding(.top, 8)
-                            }
-                        }
-                        .padding(.vertical, 40)
-                        .padding(.horizontal, 20)
-                        .frame(maxWidth: .infinity)
-                        .background(AppConstants.Colors.cardBackground)
-                        .cornerRadius(20)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(AppConstants.Colors.border, lineWidth: 0.5)
                         )
-                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
                     }
                     .transition(.scale.combined(with: .opacity))
                     
@@ -159,6 +120,133 @@ struct DashboardView: View {
         .background(AppConstants.Colors.background)
         .navigationBarHidden(true)
         .navigationViewStyle(StackNavigationViewStyle())
+    }
+}
+
+// MARK: - Swipeable Focus Card
+
+struct SwipeableFocusCard: View {
+    let task: Task
+    let onComplete: () -> Void
+    let onDefer: () -> Void
+    
+    @State private var dragOffset: CGSize = .zero
+    
+    var body: some View {
+        ZStack {
+            // Background actions
+            if abs(dragOffset.width) > 50 {
+                HStack {
+                    if dragOffset.width > 50 {
+                        // Complete action (right swipe)
+                        Spacer()
+                        VStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(.white)
+                            Text("完成")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.trailing, 40)
+                    } else if dragOffset.width < -50 {
+                        // Defer action (left swipe)
+                        VStack(spacing: 8) {
+                            Image(systemName: "clock.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(.white)
+                            Text("延期")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.leading, 40)
+                        Spacer()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(dragOffset.width > 50 ? .green : .orange)
+                )
+            }
+            
+            // Main task card
+            VStack(spacing: AppConstants.Spacing.contentSpacing) {
+                // Priority indicator (if high/urgent)
+                if task.priority == .high || task.priority == .urgent {
+                    HStack {
+                        Text(task.priority.displayName)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 4)
+                            .background(task.priority == .urgent ? Color.red : Color.orange)
+                            .cornerRadius(12)
+                        
+                        Spacer()
+                    }
+                }
+                
+                // Task Title - 更突出
+                Text(task.title)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(AppConstants.Colors.primaryText)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(nil)
+                    .padding(.horizontal, 20)
+                
+                // Task Description (if available)
+                if let description = task.description, !description.isEmpty {
+                    Text(description)
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(AppConstants.Colors.secondaryText)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(nil)
+                        .padding(.horizontal, 20)
+                }
+                
+                // Due Date (if set) - 更subtle
+                if let dueDate = task.dueDate {
+                    Text(dueDate.shortDateString)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(dueDate.daysFromNow() <= 1 && dueDate.daysFromNow() >= 0 ? Color.red : AppConstants.Colors.secondaryText)
+                        .padding(.top, 8)
+                }
+            }
+            .padding(.vertical, 40)
+            .padding(.horizontal, 20)
+            .frame(maxWidth: .infinity)
+            .background(AppConstants.Colors.cardBackground)
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(AppConstants.Colors.border, lineWidth: 0.5)
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+            .offset(dragOffset)
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        dragOffset = value.translation
+                    }
+                    .onEnded { value in
+                        let threshold: CGFloat = 120
+                        
+                        if value.translation.width > threshold {
+                            // Complete task
+                            onComplete()
+                        } else if value.translation.width < -threshold {
+                            // Defer task
+                            onDefer()
+                        }
+                        
+                        // Reset position
+                        withAnimation(.spring()) {
+                            dragOffset = .zero
+                        }
+                    }
+            )
+        }
     }
 }
 
