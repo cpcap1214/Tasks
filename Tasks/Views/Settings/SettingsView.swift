@@ -15,14 +15,15 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 32) {
+                VStack(spacing: 40) {
                     // Header
                     Text("Settings")
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.system(size: 28, weight: .bold))
                         .foregroundColor(AppConstants.Colors.primaryText)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, 10)
                     
-                    VStack(spacing: 24) {
+                    VStack(spacing: 32) {
                         // Preferences Section
                         preferencesSection
                         
@@ -35,7 +36,7 @@ struct SettingsView: View {
                     
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 16)
             }
             .background(AppConstants.Colors.background)
             .navigationBarHidden(true)
@@ -64,9 +65,9 @@ struct SettingsView: View {
     private var preferencesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Preferences")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundColor(AppConstants.Colors.primaryText)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 16)
             
             VStack(spacing: 0) {
                 ModernSettingsRow(
@@ -141,7 +142,7 @@ struct SettingsView: View {
                     .stroke(AppConstants.Colors.border, lineWidth: 1)
             )
             .cornerRadius(12)
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 16)
         }
     }
     
@@ -150,9 +151,9 @@ struct SettingsView: View {
     private var dataOverviewSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Data Overview")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundColor(AppConstants.Colors.primaryText)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 16)
             
             VStack(spacing: 0) {
                 ModernSettingsRow(
@@ -191,7 +192,7 @@ struct SettingsView: View {
                     .stroke(AppConstants.Colors.border, lineWidth: 1)
             )
             .cornerRadius(12)
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 16)
         }
     }
     
@@ -200,9 +201,9 @@ struct SettingsView: View {
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("About")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundColor(AppConstants.Colors.primaryText)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 16)
             
             VStack(spacing: 0) {
                 ModernSettingsRow(
@@ -252,7 +253,7 @@ struct SettingsView: View {
                     .stroke(AppConstants.Colors.border, lineWidth: 1)
             )
             .cornerRadius(12)
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 16)
         }
     }
 }
