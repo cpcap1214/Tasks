@@ -111,29 +111,10 @@ struct SettingsView: View {
                 ModernSettingsRow(
                     icon: "bell",
                     title: "Task Reminders",
-                    showDivider: true
+                    showDivider: false
                 ) {
                     Toggle("", isOn: .constant(true))
                         .toggleStyle(SwitchToggleStyle())
-                }
-                
-                ModernSettingsRow(
-                    icon: "dollarsign.square",
-                    title: "Preferred Currency",
-                    showDivider: false
-                ) {
-                    HStack(spacing: 4) {
-                        Text("TWD")
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(AppConstants.Colors.secondaryBackground)
-                    .cornerRadius(8)
                 }
             }
             .background(AppConstants.Colors.cardBackground)

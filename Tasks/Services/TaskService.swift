@@ -186,58 +186,58 @@ class TaskService: ObservableObject {
         let today = Date()
         
         let defaultTasks: [Task] = [
-            // 低優先級任務 (2個)
+            // 低優先級任務 (2個) - App基礎設定
             Task(
-                title: "整理桌面檔案",
-                description: "清理桌面上的文件，將重要文件歸檔到適當的資料夾中，刪除不需要的檔案。建立良好的檔案管理習慣。",
+                title: "個人化您的任務管理體驗",
+                description: "完成這個任務後，您將了解如何使用 Tasks 的核心功能。嘗試標記完成、延期功能，並觀察任務在不同區域間的移動。",
                 priority: .low,
                 dueDate: calendar.date(byAdding: .day, value: 7, to: today)
             ),
             Task(
-                title: "閱讀一篇技術文章",
-                description: "選擇一篇與工作相關的技術文章進行深度閱讀，做筆記並思考如何應用到實際工作中。持續學習新知識。",
+                title: "探索長按查看完整描述功能",
+                description: "當任務描述過長時，您可以長按任務卡片來查看完整內容。這個功能在 Dashboard 和所有任務頁面都可以使用，讓您更好地管理詳細資訊。",
                 priority: .low,
                 dueDate: calendar.date(byAdding: .day, value: 5, to: today)
             ),
             
-            // 普通優先級任務 (2個)  
+            // 普通優先級任務 (2個) - 功能介紹
             Task(
-                title: "規劃下週工作安排",
-                description: "檢視下週的行程表，安排重要會議和任務的時間分配。確保工作與生活的平衡，預留緩衝時間處理突發事件。",
+                title: "熟悉四大任務區域分類",
+                description: "Tasks 將您的任務分為四個區域：專注下一步（最重要任務）、即將到來（有期限任務）、靈感收集（無期限想法）、延期任務（暫時延後）。了解這個分類有助於提高工作效率。",
                 priority: .normal,
                 dueDate: calendar.date(byAdding: .day, value: 3, to: today)
             ),
             Task(
-                title: "更新履歷和LinkedIn",
-                description: "檢查並更新個人履歷，新增最近的工作經驗和技能。同步更新LinkedIn個人檔案，確保資訊的完整性和時效性。",
+                title: "測試 Dashboard 的專注模式",
+                description: "Dashboard 只顯示一個最重要的任務，幫助您專注。您可以通過滑動手勢快速完成或延期任務，也可以使用底部按鈕進行操作。",
                 priority: .normal,
-                dueDate: calendar.date(byAdding: .day, value: 10, to: today)
+                dueDate: calendar.date(byAdding: .day, value: 4, to: today)
             ),
             
-            // 高優先級任務 (2個)
+            // 高優先級任務 (2個) - 進階功能
             Task(
-                title: "完成月度專案報告",
-                description: "整理本月專案進度資料，分析完成率和遇到的挑戰。準備簡報並安排與主管討論，制定下個月的改進計畫。",
+                title: "練習使用優先級系統",
+                description: "Tasks 提供四種優先級：低、普通、高、緊急。高優先級和緊急任務會顯示彩色標記。學會正確設定優先級可以幫助您更好地安排工作順序。",
                 priority: .high,
                 dueDate: calendar.date(byAdding: .day, value: 2, to: today)
             ),
             Task(
-                title: "預約重要會議",
-                description: "聯繫客戶安排下週的專案檢討會議，確認會議室和所需設備。準備會議議程和相關文件資料。",
+                title: "體驗滑動手勢操作",
+                description: "在 Dashboard 頁面，您可以右滑完成任務，左滑延期任務。這個直觀的手勢操作讓任務管理更加快速便捷。",
                 priority: .high,
                 dueDate: calendar.date(byAdding: .day, value: 1, to: today)
             ),
             
-            // 緊急優先級任務 (2個)
+            // 緊急優先級任務 (2個) - 快速上手
             Task(
-                title: "回覆重要客戶郵件",
-                description: "立即回覆客戶關於專案進度的詢問郵件，提供詳細的狀況更新和下一步行動計畫。維持良好的客戶關係。",
+                title: "創建您的第一個自定義任務",
+                description: "點擊右上角的 + 按鈕，嘗試創建一個屬於您的任務。您可以設定標題、描述、優先級和截止日期。完成這步後，您就完全掌握了 Tasks 的基本用法！",
                 priority: .urgent,
                 dueDate: today
             ),
             Task(
-                title: "修復系統緊急問題",
-                description: "處理生產環境中發現的系統錯誤，進行緊急修復並測試。聯繫相關團隊成員協助解決，確保系統穩定運行。",
+                title: "完成 Tasks 應用設定",
+                description: "這是您的最後一個設定任務！完成後，請刪除所有範例任務，開始使用 Tasks 管理您的真實工作。記住：一次專注一個任務，效率更高！",
                 priority: .urgent,
                 dueDate: today
             )

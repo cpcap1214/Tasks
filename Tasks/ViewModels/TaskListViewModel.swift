@@ -158,6 +158,14 @@ class TaskListViewModel: ObservableObject {
         return Array(unscheduledTasks.prefix(4)) // Show up to 4 unscheduled ideas
     }
     
+    var deferredTasks: [Task] {
+        // All deferred tasks
+        let deferred = tasks.filter { task in
+            task.isDeferred
+        }
+        return Array(deferred.prefix(4)) // Show up to 4 deferred tasks
+    }
+    
     var doneThisWeek: [Task] {
         // Completed tasks from this week
         let calendar = Calendar.current
@@ -192,6 +200,7 @@ enum TaskSection: String, CaseIterable {
     case nextToFocus = "Next to Focus"
     case upcoming = "Upcoming"
     case unscheduledIdeas = "Unscheduled Ideas"
+    case deferred = "Deferred"
     case doneThisWeek = "Done This Week"
     
     var displayName: String {
@@ -202,6 +211,8 @@ enum TaskSection: String, CaseIterable {
             return "即將到來"
         case .unscheduledIdeas:
             return "靈感收集"
+        case .deferred:
+            return "延期任務"
         case .doneThisWeek:
             return "本週完成"
         }
@@ -215,6 +226,8 @@ enum TaskSection: String, CaseIterable {
             return "已安排時間的任務"
         case .unscheduledIdeas:
             return "待安排的想法"
+        case .deferred:
+            return "暫時延期的任務"
         case .doneThisWeek:
             return "近期的成就"
         }

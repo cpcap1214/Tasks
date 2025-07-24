@@ -91,6 +91,15 @@ struct AllTasksView: View {
                     )
                 }
                 
+                // Deferred Tasks Section
+                if !viewModel.deferredTasks.isEmpty {
+                    TaskSectionView(
+                        section: .deferred,
+                        tasks: viewModel.deferredTasks,
+                        onTaskAction: handleTaskAction
+                    )
+                }
+                
                 // Done This Week Section
                 if !viewModel.doneThisWeek.isEmpty {
                     TaskSectionView(
