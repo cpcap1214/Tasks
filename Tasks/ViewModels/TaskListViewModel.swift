@@ -166,6 +166,11 @@ class TaskListViewModel: ObservableObject {
         return Array(deferred.prefix(4)) // Show up to 4 deferred tasks
     }
     
+    var allIncompleteTasks: [Task] {
+        // All incomplete tasks (not completed)
+        return tasks.filter { !$0.isCompleted }
+    }
+    
     var doneThisWeek: [Task] {
         // Completed tasks from this week
         let calendar = Calendar.current
