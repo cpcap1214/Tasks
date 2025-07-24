@@ -35,20 +35,20 @@ struct AddTaskView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 32) {
                     // Header Section
                     VStack(spacing: 8) {
                         Text(isEditing ? "編輯任務" : "新增任務")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.primary)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(AppConstants.Colors.primaryText)
                         
                         Text(isEditing ? "修改任務詳細資訊" : "建立你的下一個目標")
-                            .font(.system(size: 16))
-                            .foregroundColor(.secondary)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(AppConstants.Colors.secondaryText)
                     }
                     .padding(.top, 20)
                     
-                    VStack(spacing: 20) {
+                    VStack(spacing: 32) {
                         // Title Section
                         ModernInputSection(
                             title: "任務標題",
@@ -99,40 +99,42 @@ struct AddTaskView: View {
                     Spacer(minLength: 40)
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(AppConstants.Colors.background)
             .navigationBarHidden(true)
             .safeAreaInset(edge: .bottom) {
                 // Action Buttons
-                VStack(spacing: 12) {
+                VStack(spacing: 8) {
                     // Save Button
                     Button(action: saveTask) {
                         Text(isEditing ? "更新任務" : "建立任務")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(canSave ? AppConstants.Colors.background : AppConstants.Colors.secondaryText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(canSave ? Color.black : Color.gray.opacity(0.3))
+                            .background(canSave ? AppConstants.Colors.accent : AppConstants.Colors.secondaryBackground)
                             .cornerRadius(12)
                     }
                     .disabled(!canSave)
+                    .scaleEffect(canSave ? 1.0 : 0.95)
+                    .animation(.easeInOut(duration: 0.1), value: canSave)
                     
                     // Cancel Button
                     Button(action: { dismiss() }) {
                         Text("取消")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundColor(.primary)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(AppConstants.Colors.primaryText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                             .background(Color.clear)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    .stroke(AppConstants.Colors.border, lineWidth: 1)
                             )
                     }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 8)
-                .background(Color(.systemGroupedBackground))
+                .background(AppConstants.Colors.background)
             }
         }
         .onAppear {
@@ -190,23 +192,23 @@ struct ModernInputSection<Content: View>: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 4) {
                     Text(title)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(AppConstants.Colors.primaryText)
                     
                     if isRequired {
                         Text("*")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.red)
+                            .foregroundColor(AppConstants.Colors.destructive)
                     }
                 }
                 
                 Text(subtitle)
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(AppConstants.Colors.secondaryText)
             }
             
             content
@@ -220,14 +222,15 @@ struct ModernTextField: View {
     
     var body: some View {
         TextField(placeholder, text: $text)
-            .font(.system(size: 16))
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(.systemBackground))
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundColor(AppConstants.Colors.primaryText)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(AppConstants.Colors.cardBackground)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                    .stroke(AppConstants.Colors.border, lineWidth: 0.5)
             )
     }
 }
@@ -240,24 +243,25 @@ struct ModernTextEditor: View {
         ZStack(alignment: .topLeading) {
             if text.isEmpty {
                 Text(placeholder)
-                    .font(.system(size: 16))
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(AppConstants.Colors.secondaryText)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 20)
             }
             
             TextEditor(text: $text)
-                .font(.system(size: 16))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(AppConstants.Colors.primaryText)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
                 .frame(minHeight: 100)
                 .scrollContentBackground(.hidden)
         }
-        .background(Color(.systemBackground))
+        .background(AppConstants.Colors.cardBackground)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                .stroke(AppConstants.Colors.border, lineWidth: 0.5)
         )
     }
 }
@@ -275,7 +279,6 @@ struct PrioritySelector: View {
                 )
             }
         }
-        .padding(.vertical, 4)
     }
 }
 
@@ -294,12 +297,12 @@ struct PriorityOptionRow: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(priority.displayName)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(AppConstants.Colors.primaryText)
                     
                     Text(priorityDescription(for: priority))
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(AppConstants.Colors.secondaryText)
                 }
                 
                 Spacer()
@@ -307,17 +310,19 @@ struct PriorityOptionRow: View {
                 // Selection Indicator
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 20))
-                    .foregroundColor(isSelected ? .blue : .gray.opacity(0.4))
+                    .foregroundColor(isSelected ? AppConstants.Colors.accent : AppConstants.Colors.secondaryText.opacity(0.4))
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(.systemBackground))
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(AppConstants.Colors.cardBackground)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2), lineWidth: 1)
+                    .stroke(isSelected ? AppConstants.Colors.accent.opacity(0.3) : AppConstants.Colors.border, lineWidth: isSelected ? 1 : 0.5)
             )
         }
+        .scaleEffect(isSelected ? 0.98 : 1.0)
+        .animation(.easeInOut(duration: 0.1), value: isSelected)
     }
     
     private func priorityColor(for priority: TaskPriority) -> Color {
@@ -343,36 +348,34 @@ struct DueDateToggle: View {
     @Binding var hasDueDate: Bool
     
     var body: some View {
-        Button(action: { hasDueDate.toggle() }) {
-            HStack(spacing: 16) {
-                Image(systemName: hasDueDate ? "calendar.circle.fill" : "calendar.circle")
-                    .font(.system(size: 20))
-                    .foregroundColor(hasDueDate ? .blue : .gray.opacity(0.6))
+        HStack(spacing: 16) {
+            Image(systemName: hasDueDate ? "calendar.circle.fill" : "calendar.circle")
+                .font(.system(size: 20))
+                .foregroundColor(hasDueDate ? AppConstants.Colors.accent : AppConstants.Colors.secondaryText)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text("設定截止日期")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(AppConstants.Colors.primaryText)
                 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("設定截止日期")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                    
-                    Text(hasDueDate ? "已設定日期提醒" : "無截止日期")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                Toggle("", isOn: $hasDueDate)
-                    .toggleStyle(SwitchToggleStyle())
+                Text(hasDueDate ? "已設定日期提醒" : "無截止日期")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(AppConstants.Colors.secondaryText)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-            )
+            
+            Spacer()
+            
+            Toggle("", isOn: $hasDueDate)
+                .toggleStyle(SwitchToggleStyle())
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(AppConstants.Colors.cardBackground)
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(AppConstants.Colors.border, lineWidth: 0.5)
+        )
     }
 }
 
@@ -387,14 +390,15 @@ struct ModernDatePicker: View {
             displayedComponents: [.date]
         )
         .datePickerStyle(.compact)
-        .font(.system(size: 16))
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(.systemBackground))
+        .font(.system(size: 16, weight: .semibold))
+        .foregroundColor(AppConstants.Colors.primaryText)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(AppConstants.Colors.cardBackground)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                .stroke(AppConstants.Colors.border, lineWidth: 0.5)
         )
     }
 }
