@@ -202,7 +202,7 @@ struct TaskSectionView: View {
             // Tasks
             VStack(spacing: 12) {
                 ForEach(tasks) { task in
-                    SwipeableTaskCard(
+                    TaskCard(
                         task: task,
                         isCompleted: task.isCompleted,
                         showFocusStyle: section == .nextToFocus,
@@ -214,89 +214,6 @@ struct TaskSectionView: View {
     }
 }
 
-// MARK: - Swipeable Task Card
-
-struct SwipeableTaskCard: View {
-    let task: Task
-    let isCompleted: Bool
-    let showFocusStyle: Bool
-    let onTaskAction: (TaskAction, Task) -> Void
-    
-    @State private var dragOffset: CGSize = .zero
-    
-    var body: some View {
-        ZStack {
-            // Background actions (only for focus tasks)
-            if showFocusStyle && abs(dragOffset.width) > 50 {
-                HStack {
-                    if dragOffset.width > 50 {
-                        // Complete action
-                        Spacer()
-                        VStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(.white)
-                            Text("完成")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.trailing, 20)
-                    } else if dragOffset.width < -50 {
-                        // Defer action
-                        VStack {
-                            Image(systemName: "clock.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(.white)
-                            Text("延期")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.leading, 20)
-                        Spacer()
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(dragOffset.width > 50 ? .green : .orange)
-                )
-            }
-            
-            // Main task card
-            TaskCard(
-                task: task,
-                isCompleted: isCompleted,
-                showFocusStyle: showFocusStyle,
-                onTaskAction: onTaskAction
-            )
-            .offset(dragOffset)
-            .gesture(
-                showFocusStyle ?
-                DragGesture()
-                    .onChanged { value in
-                        dragOffset = value.translation
-                    }
-                    .onEnded { value in
-                        let threshold: CGFloat = 100
-                        
-                        if value.translation.width > threshold {
-                            // Complete task
-                            onTaskAction(.toggleCompletion, task)
-                        } else if value.translation.width < -threshold {
-                            // Defer task
-                            onTaskAction(.deferTask, task)
-                        }
-                        
-                        // Reset position
-                        withAnimation(.spring()) {
-                            dragOffset = .zero
-                        }
-                    }
-                : nil
-            )
-        }
-    }
-}
 
 // MARK: - Basic Task Card
 
@@ -305,6 +222,8 @@ struct TaskCard: View {
     let isCompleted: Bool
     let showFocusStyle: Bool
     let onTaskAction: (TaskAction, Task) -> Void
+    
+    @State private var showingFullDescription = false
     
     var body: some View {
         HStack(spacing: 16) {
@@ -434,6 +353,18 @@ struct TaskCard: View {
                     lineWidth: showFocusStyle ? 1 : 0
                 )
         )
+        .onLongPressGesture {
+            if let description = task.description, !description.isEmpty {
+                showingFullDescription = true
+            }
+        }
+        .alert("任務詳細描述", isPresented: $showingFullDescription) {
+            Button("確定", role: .cancel) { }
+        } message: {
+            if let description = task.description {
+                Text(description)
+            }
+        }
     }
 }
 

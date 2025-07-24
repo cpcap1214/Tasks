@@ -131,6 +131,7 @@ struct SwipeableFocusCard: View {
     let onDefer: () -> Void
     
     @State private var dragOffset: CGSize = .zero
+    @State private var showingFullDescription = false
     
     var body: some View {
         ZStack {
@@ -246,6 +247,18 @@ struct SwipeableFocusCard: View {
                         }
                     }
             )
+            .onLongPressGesture {
+                if let description = task.description, !description.isEmpty {
+                    showingFullDescription = true
+                }
+            }
+        }
+        .alert("任務詳細描述", isPresented: $showingFullDescription) {
+            Button("確定", role: .cancel) { }
+        } message: {
+            if let description = task.description {
+                Text(description)
+            }
         }
     }
 }
