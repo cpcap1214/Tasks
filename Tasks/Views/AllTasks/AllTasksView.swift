@@ -170,6 +170,10 @@ struct AllTasksView: View {
             withAnimation(.easeInOut(duration: 0.3)) {
                 viewModel.deleteTask(task)
             }
+        case .deferTask:
+            withAnimation(.easeInOut(duration: 0.3)) {
+                viewModel.toggleTaskDeferred(task)
+            }
         }
     }
 }
@@ -198,7 +202,7 @@ struct TaskSectionView: View {
             // Tasks
             VStack(spacing: 12) {
                 ForEach(tasks) { task in
-                    CleanTaskCard(
+                    SwipeableTaskCard(
                         task: task,
                         isCompleted: task.isCompleted,
                         showFocusStyle: section == .nextToFocus,
@@ -210,9 +214,93 @@ struct TaskSectionView: View {
     }
 }
 
-// MARK: - Clean Task Card
+// MARK: - Swipeable Task Card
 
-struct CleanTaskCard: View {
+struct SwipeableTaskCard: View {
+    let task: Task
+    let isCompleted: Bool
+    let showFocusStyle: Bool
+    let onTaskAction: (TaskAction, Task) -> Void
+    
+    @State private var dragOffset: CGSize = .zero
+    
+    var body: some View {
+        ZStack {
+            // Background actions (only for focus tasks)
+            if showFocusStyle && abs(dragOffset.width) > 50 {
+                HStack {
+                    if dragOffset.width > 50 {
+                        // Complete action
+                        Spacer()
+                        VStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                            Text("完成")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.trailing, 20)
+                    } else if dragOffset.width < -50 {
+                        // Defer action
+                        VStack {
+                            Image(systemName: "clock.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                            Text("延期")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.leading, 20)
+                        Spacer()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(dragOffset.width > 50 ? .green : .orange)
+                )
+            }
+            
+            // Main task card
+            TaskCard(
+                task: task,
+                isCompleted: isCompleted,
+                showFocusStyle: showFocusStyle,
+                onTaskAction: onTaskAction
+            )
+            .offset(dragOffset)
+            .gesture(
+                showFocusStyle ?
+                DragGesture()
+                    .onChanged { value in
+                        dragOffset = value.translation
+                    }
+                    .onEnded { value in
+                        let threshold: CGFloat = 100
+                        
+                        if value.translation.width > threshold {
+                            // Complete task
+                            onTaskAction(.toggleCompletion, task)
+                        } else if value.translation.width < -threshold {
+                            // Defer task
+                            onTaskAction(.deferTask, task)
+                        }
+                        
+                        // Reset position
+                        withAnimation(.spring()) {
+                            dragOffset = .zero
+                        }
+                    }
+                : nil
+            )
+        }
+    }
+}
+
+// MARK: - Basic Task Card
+
+struct TaskCard: View {
     let task: Task
     let isCompleted: Bool
     let showFocusStyle: Bool
@@ -250,12 +338,28 @@ struct CleanTaskCard: View {
                     }
                 }
                 
-                // Description (only show for focus task or if exists)
+                // Description
                 if let description = task.description, !description.isEmpty, (showFocusStyle || description.count < 50) {
                     Text(description)
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                         .lineLimit(showFocusStyle ? 3 : 1)
+                }
+                
+                // Defer status indicator
+                if task.isDeferred {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 10))
+                        Text("已延期")
+                            .font(.system(size: 12, weight: .medium))
+                    }
+                    .foregroundColor(.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 // Due Date
@@ -285,6 +389,17 @@ struct CleanTaskCard: View {
                         isCompleted ? "標記為待辦" : "標記為完成",
                         systemImage: isCompleted ? "circle" : "checkmark.circle"
                     )
+                }
+                
+                if !isCompleted {
+                    Button(action: {
+                        onTaskAction(.deferTask, task)
+                    }) {
+                        Label(
+                            task.isDeferred ? "取消延期" : "延期任務",
+                            systemImage: task.isDeferred ? "clock.arrow.circlepath" : "clock"
+                        )
+                    }
                 }
                 
                 Divider()
@@ -328,6 +443,7 @@ enum TaskAction {
     case toggleCompletion
     case edit
     case delete
+    case deferTask
 }
 
 // MARK: - Helper Functions
