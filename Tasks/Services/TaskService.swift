@@ -15,10 +15,23 @@ class TaskService: ObservableObject {
     @Published var stats: AppStats = AppStats()
     
     private let fileManager = FileManagerService.shared
+    private var saveQueue = DispatchQueue(label: "tasks.save.queue", qos: .utility)
+    private var autoSaveTimer: Timer?
+    private var hasUnsavedChanges = false
     
     private init() {
         loadData()
         recordAppOpen()
+        setupAutoSave()
+    }
+    
+    deinit {
+        autoSaveTimer?.invalidate()
+        // Final save on deinit
+        if hasUnsavedChanges {
+            saveTasks()
+            saveStats()
+        }
     }
     
     // MARK: - Data Loading
@@ -32,15 +45,27 @@ class TaskService: ObservableObject {
         do {
             tasks = try fileManager.loadTasks()
             
+            // Validate loaded data integrity
+            validateTaskData()
+            
             // Initialize with default tasks if no tasks exist
             if tasks.isEmpty {
                 initializeDefaultTasks()
             }
         } catch {
             print("Failed to load tasks: \(error)")
-            tasks = []
-            // Initialize with default tasks on first launch
-            initializeDefaultTasks()
+            
+            // Try to load from backup
+            if let backupTasks = loadTasksFromBackup() {
+                tasks = backupTasks
+                validateTaskData()
+                // Save restored data immediately
+                saveTasks()
+            } else {
+                tasks = []
+                // Initialize with default tasks on first launch
+                initializeDefaultTasks()
+            }
         }
     }
     
@@ -50,6 +75,51 @@ class TaskService: ObservableObject {
         } catch {
             print("Failed to load stats: \(error)")
             stats = AppStats()
+            // Save initial stats
+            saveStats()
+        }
+    }
+    
+    private func validateTaskData() {
+        // Remove any invalid tasks and fix data inconsistencies
+        let validTasks = tasks.filter { task in
+            !task.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        
+        if validTasks.count != tasks.count {
+            print("Removed \(tasks.count - validTasks.count) invalid tasks")
+            tasks = validTasks
+            hasUnsavedChanges = true
+        }
+    }
+    
+    private func loadTasksFromBackup() -> [Task]? {
+        do {
+            return try fileManager.loadBackupTasks()
+        } catch {
+            print("Failed to load backup tasks: \(error)")
+            return nil
+        }
+    }
+    
+    // MARK: - Auto Save System
+    
+    private func setupAutoSave() {
+        // Auto-save every 30 seconds if there are unsaved changes
+        autoSaveTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { [weak self] _ in
+            self?.performAutoSave()
+        }
+    }
+    
+    private func performAutoSave() {
+        guard hasUnsavedChanges else { return }
+        
+        saveQueue.async { [weak self] in
+            self?.saveTasks()
+            self?.saveStats()
+            DispatchQueue.main.async {
+                self?.hasUnsavedChanges = false
+            }
         }
     }
     
@@ -57,9 +127,18 @@ class TaskService: ObservableObject {
     
     private func saveTasks() {
         do {
+            // Create backup before saving
+            try fileManager.createTasksBackup(tasks)
+            
+            // Save current data
             try fileManager.saveTasks(tasks)
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.hasUnsavedChanges = false
+            }
         } catch {
             print("Failed to save tasks: \(error)")
+            // TODO: Could implement retry logic or user notification
         }
     }
     
@@ -71,33 +150,49 @@ class TaskService: ObservableObject {
         }
     }
     
+    private func immediateSync() {
+        // Force immediate save, used for critical operations
+        saveTasks()
+        saveStats()
+    }
+    
     // MARK: - Task Management
     
     func addTask(_ task: Task) {
         tasks.append(task)
         stats.incrementTasksCreated()
-        saveTasks()
-        saveStats()
+        hasUnsavedChanges = true
+        
+        // Save immediately for critical operations
+        immediateSync()
     }
     
     func updateTask(_ task: Task) {
         if let index = tasks.firstIndex(where: { $0.id == task.id }) {
             tasks[index] = task
-            saveTasks()
+            hasUnsavedChanges = true
+            
+            // Batch save for updates (auto-save will handle)
+            performAutoSave()
         }
     }
     
     func deleteTask(_ task: Task) {
         tasks.removeAll { $0.id == task.id }
-        saveTasks()
+        hasUnsavedChanges = true
+        
+        // Save immediately for critical operations
+        immediateSync()
     }
     
     func markTaskAsCompleted(_ task: Task) {
         if let index = tasks.firstIndex(where: { $0.id == task.id }) {
             tasks[index].markAsCompleted()
             stats.incrementTasksCompleted()
-            saveTasks()
-            saveStats()
+            hasUnsavedChanges = true
+            
+            // Save immediately for critical operations
+            immediateSync()
         }
     }
     

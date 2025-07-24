@@ -71,25 +71,6 @@ struct SettingsView: View {
             
             VStack(spacing: 0) {
                 ModernSettingsRow(
-                    icon: "globe",
-                    title: "Language",
-                    showDivider: true
-                ) {
-                    HStack(spacing: 4) {
-                        Text("繁體中文")
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(AppConstants.Colors.secondaryBackground)
-                    .cornerRadius(8)
-                }
-                
-                ModernSettingsRow(
                     icon: "paintbrush",
                     title: "Appearance",
                     showDivider: true
