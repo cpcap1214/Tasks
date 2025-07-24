@@ -73,7 +73,7 @@ struct DashboardView: View {
             Spacer()
             
             // Action Buttons - 只在有任務時顯示
-            if let currentTask = viewModel.currentTask {
+            if viewModel.currentTask != nil {
                 VStack(spacing: 12) {
                     // Mark as Done Button
                     Button(action: {

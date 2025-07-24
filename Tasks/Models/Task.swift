@@ -8,7 +8,7 @@
 import Foundation
 
 struct Task: Identifiable, Codable, Equatable {
-    let id = UUID()
+    let id: UUID
     var title: String
     var description: String?
     var priority: TaskPriority
@@ -25,6 +25,7 @@ struct Task: Identifiable, Codable, Equatable {
         priority: TaskPriority = .normal,
         dueDate: Date? = nil
     ) {
+        self.id = UUID()
         self.title = title
         self.description = description
         self.priority = priority

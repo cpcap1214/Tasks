@@ -444,7 +444,7 @@ struct JSONDebugView: View {
             if isExpanded {
                 ScrollView {
                     Text(jsonString)
-                        .font(.system(size: 12, family: .monospaced))
+                        .font(.system(size: 12, weight: .regular, design: .monospaced))
                         .foregroundColor(.primary)
                         .textSelection(.enabled)
                         .padding(16)
