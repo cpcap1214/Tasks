@@ -69,30 +69,46 @@ struct AllTasksView: View {
     // MARK: - Header View
     
     private var headerView: some View {
-        VStack(spacing: AppConstants.Spacing.contentSpacing) {
-            // Task counts grid - similar to Subscriptions stats layout
-            HStack(spacing: AppConstants.Spacing.contentSpacing) {
-                StatsCardView(
-                    title: "Total",
-                    value: "\(viewModel.taskCounts.total)"
-                )
-                
-                StatsCardView(
-                    title: "Pending",
-                    value: "\(viewModel.taskCounts.pending)"
-                )
-            }
+        VStack(spacing: 20) {
+            // Header Title
+            Text("Task Overview")
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(AppConstants.Colors.primaryText)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
-            HStack(spacing: AppConstants.Spacing.contentSpacing) {
-                StatsCardView(
-                    title: "Completed",
-                    value: "\(viewModel.taskCounts.completed)"
-                )
+            // Task counts grid - modern card layout
+            VStack(spacing: 16) {
+                HStack(spacing: 16) {
+                    ModernStatsCard(
+                        icon: "list.bullet",
+                        title: "Total Tasks",
+                        value: "\(viewModel.taskCounts.total)",
+                        color: AppConstants.Colors.accent
+                    )
+                    
+                    ModernStatsCard(
+                        icon: "clock",
+                        title: "Pending",
+                        value: "\(viewModel.taskCounts.pending)",
+                        color: .orange
+                    )
+                }
                 
-                StatsCardView(
-                    title: "Deferred",
-                    value: "\(viewModel.taskCounts.deferred)"
-                )
+                HStack(spacing: 16) {
+                    ModernStatsCard(
+                        icon: "checkmark.circle",
+                        title: "Completed",
+                        value: "\(viewModel.taskCounts.completed)",
+                        color: .green
+                    )
+                    
+                    ModernStatsCard(
+                        icon: "pause.circle",
+                        title: "Deferred",
+                        value: "\(viewModel.taskCounts.deferred)",
+                        color: .gray
+                    )
+                }
             }
         }
     }
@@ -100,28 +116,35 @@ struct AllTasksView: View {
     // MARK: - Filter Section
     
     private var filterSection: some View {
-        VStack(spacing: AppConstants.Spacing.elementSpacing) {
-            // Search Bar
-            HStack {
+        VStack(spacing: 16) {
+            // Modern Search Bar
+            HStack(spacing: 12) {
                 Image(systemName: "magnifyingglass")
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(AppConstants.Colors.secondaryText)
                 
                 TextField("搜尋任務...", text: $viewModel.searchText)
+                    .font(.system(size: 16))
                     .textFieldStyle(PlainTextFieldStyle())
                 
                 if !viewModel.searchText.isEmpty {
                     Button(action: { viewModel.searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 16))
                             .foregroundColor(AppConstants.Colors.secondaryText)
                     }
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(AppConstants.Colors.secondaryBackground)
-            .cornerRadius(AppConstants.CornerRadius.smallElement)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(AppConstants.Colors.cardBackground)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(AppConstants.Colors.border, lineWidth: 1)
+            )
+            .cornerRadius(12)
             
-            // Filter Picker
+            // Modern Filter Picker
             Picker("Filter", selection: $viewModel.selectedFilter) {
                 ForEach(TaskFilter.allCases, id: \.self) { filter in
                     Text(filter.displayName)
@@ -129,6 +152,8 @@ struct AllTasksView: View {
                 }
             }
             .pickerStyle(SegmentedPickerStyle())
+            .background(AppConstants.Colors.cardBackground)
+            .cornerRadius(8)
         }
     }
     
@@ -140,31 +165,31 @@ struct AllTasksView: View {
                 // Empty state
                 emptyStateView
             } else {
-                // Task list
-                List {
-                    ForEach(viewModel.filteredTasks) { task in
-                        TaskRowView(
-                            task: task,
-                            onToggleCompletion: {
-                                withAnimation(AppConstants.Animation.stateChange) {
-                                    viewModel.toggleTaskCompletion(task)
+                // Modern Task list
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(viewModel.filteredTasks) { task in
+                            ModernTaskRow(
+                                task: task,
+                                onToggleCompletion: {
+                                    withAnimation(AppConstants.Animation.stateChange) {
+                                        viewModel.toggleTaskCompletion(task)
+                                    }
+                                },
+                                onEdit: {
+                                    viewModel.startEditingTask(task)
+                                },
+                                onDelete: {
+                                    withAnimation(AppConstants.Animation.stateChange) {
+                                        viewModel.deleteTask(task)
+                                    }
                                 }
-                            },
-                            onEdit: {
-                                viewModel.startEditingTask(task)
-                            },
-                            onDelete: {
-                                withAnimation(AppConstants.Animation.stateChange) {
-                                    viewModel.deleteTask(task)
-                                }
-                            }
-                        )
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
-                        .padding(.horizontal, AppConstants.Spacing.pageMargin)
+                            )
+                        }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
                 }
-                .listStyle(PlainListStyle())
                 .background(AppConstants.Colors.background)
             }
         }
@@ -234,31 +259,177 @@ struct AllTasksView: View {
     }
 }
 
-// MARK: - Stats Card View
+// MARK: - Modern Stats Card View
 
-struct StatsCardView: View {
+struct ModernStatsCard: View {
+    let icon: String
     let title: String
     let value: String
+    let color: Color
     
     var body: some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(AppConstants.Fonts.categoryDisplay)
-                .foregroundColor(AppConstants.Colors.primaryText)
-                .tracking(-1)
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(color)
+                    .frame(width: 32, height: 32)
+                    .background(color.opacity(0.1))
+                    .clipShape(Circle())
+                
+                Spacer()
+                
+                Text(value)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(AppConstants.Colors.primaryText)
+            }
             
-            Text(title)
-                .font(AppConstants.Fonts.secondaryContent)
-                .foregroundColor(AppConstants.Colors.secondaryText)
+            HStack {
+                Text(title)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(AppConstants.Colors.secondaryText)
+                    .multilineTextAlignment(.leading)
+                
+                Spacer()
+            }
         }
+        .padding(16)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, AppConstants.Spacing.cardVerticalPadding)
         .background(AppConstants.Colors.cardBackground)
-        .cornerRadius(AppConstants.CornerRadius.card)
         .overlay(
-            RoundedRectangle(cornerRadius: AppConstants.CornerRadius.card)
-                .stroke(AppConstants.Colors.border, lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(AppConstants.Colors.border, lineWidth: 1)
         )
+        .cornerRadius(12)
+    }
+}
+
+// MARK: - Modern Task Row View
+
+struct ModernTaskRow: View {
+    let task: Task
+    let onToggleCompletion: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Status Indicator
+            Button(action: onToggleCompletion) {
+                Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundColor(task.isCompleted ? .green : AppConstants.Colors.border)
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            // Task Content
+            VStack(alignment: .leading, spacing: 8) {
+                // Title and Priority
+                HStack {
+                    Text(task.title)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(task.isCompleted ? AppConstants.Colors.secondaryText : AppConstants.Colors.primaryText)
+                        .strikethrough(task.isCompleted)
+                        .lineLimit(2)
+                    
+                    Spacer()
+                    
+                    // Priority & Status indicators
+                    HStack(spacing: 6) {
+                        if task.isDeferred {
+                            HStack(spacing: 4) {
+                                Image(systemName: "pause.circle.fill")
+                                    .font(.system(size: 10))
+                                Text("延期")
+                                    .font(.system(size: 10, weight: .medium))
+                            }
+                            .foregroundColor(.orange)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                        
+                        if task.priority == .high || task.priority == .urgent {
+                            HStack(spacing: 4) {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .font(.system(size: 10))
+                                Text(task.priority.displayName)
+                                    .font(.system(size: 10, weight: .medium))
+                            }
+                            .foregroundColor(task.priority == .urgent ? .red : .orange)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background((task.priority == .urgent ? Color.red : Color.orange).opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+                
+                // Description
+                if let description = task.description, !description.isEmpty {
+                    Text(description)
+                        .font(.system(size: 14))
+                        .foregroundColor(AppConstants.Colors.secondaryText)
+                        .lineLimit(2)
+                }
+                
+                // Dates
+                HStack {
+                    if let dueDate = task.dueDate {
+                        HStack(spacing: 4) {
+                            Image(systemName: "calendar")
+                                .font(.system(size: 10))
+                            Text("到期: \(dueDate.shortDateString)")
+                                .font(.system(size: 12, weight: .medium))
+                        }
+                        .foregroundColor(
+                            dueDate.daysFromNow() <= 1 && dueDate.daysFromNow() >= 0 
+                            ? .red 
+                            : AppConstants.Colors.secondaryText
+                        )
+                    }
+                    
+                    Spacer()
+                    
+                    Text("建立於 \(task.createdAt.shortDateString)")
+                        .font(.system(size: 12))
+                        .foregroundColor(AppConstants.Colors.secondaryText)
+                }
+            }
+            
+            // Action Button
+            Menu {
+                Button(action: onEdit) {
+                    Label("編輯", systemImage: "pencil")
+                }
+                
+                Button(action: onToggleCompletion) {
+                    Label(
+                        task.isCompleted ? "標記為待辦" : "標記為完成",
+                        systemImage: task.isCompleted ? "circle" : "checkmark.circle"
+                    )
+                }
+                
+                Divider()
+                
+                Button(role: .destructive, action: onDelete) {
+                    Label("刪除", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(AppConstants.Colors.secondaryText)
+                    .frame(width: 24, height: 24)
+            }
+        }
+        .padding(16)
+        .background(AppConstants.Colors.cardBackground)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(AppConstants.Colors.border, lineWidth: 1)
+        )
+        .cornerRadius(12)
     }
 }
 
