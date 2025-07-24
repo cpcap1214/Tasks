@@ -67,7 +67,7 @@ struct SettingsView: View {
             Text("Preferences")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(AppConstants.Colors.primaryText)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 24)
             
             VStack(spacing: 0) {
                 ModernSettingsRow(
@@ -99,10 +99,13 @@ struct SettingsView: View {
                     showDivider: false
                 )
             }
-            .background(
+            .background(AppConstants.Colors.cardBackground)
+            .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(AppConstants.Colors.cardBackground)
+                    .stroke(AppConstants.Colors.border, lineWidth: 1)
             )
+            .cornerRadius(12)
+            .padding(.horizontal, 24)
         }
     }
     
@@ -113,7 +116,7 @@ struct SettingsView: View {
             Text("Data Overview")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(AppConstants.Colors.primaryText)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 24)
             
             VStack(spacing: 0) {
                 ModernSettingsRow(
@@ -137,10 +140,13 @@ struct SettingsView: View {
                     showDivider: false
                 )
             }
-            .background(
+            .background(AppConstants.Colors.cardBackground)
+            .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(AppConstants.Colors.cardBackground)
+                    .stroke(AppConstants.Colors.border, lineWidth: 1)
             )
+            .cornerRadius(12)
+            .padding(.horizontal, 24)
         }
     }
     
@@ -151,7 +157,7 @@ struct SettingsView: View {
             Text("About")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(AppConstants.Colors.primaryText)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 24)
             
             VStack(spacing: 0) {
                 ModernSettingsRow(
@@ -184,10 +190,13 @@ struct SettingsView: View {
                     )
                 }
             }
-            .background(
+            .background(AppConstants.Colors.cardBackground)
+            .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(AppConstants.Colors.cardBackground)
+                    .stroke(AppConstants.Colors.border, lineWidth: 1)
             )
+            .cornerRadius(12)
+            .padding(.horizontal, 24)
         }
     }
 }
@@ -260,7 +269,7 @@ struct ModernSettingsRow: View {
                 Rectangle()
                     .fill(AppConstants.Colors.border.opacity(0.3))
                     .frame(height: 0.5)
-                    .padding(.leading, 56) // Align with text start
+                    .padding(.horizontal, 64) // Match reference code padding
             }
         }
     }
