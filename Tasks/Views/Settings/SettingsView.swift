@@ -18,10 +18,9 @@ struct SettingsView: View {
                 VStack(spacing: 32) {
                     // Header
                     Text("Settings")
-                        .font(.system(size: 34, weight: .bold))
+                        .font(.system(size: 24, weight: .bold))
                         .foregroundColor(AppConstants.Colors.primaryText)
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top, 20)
                     
                     VStack(spacing: 24) {
                         // Preferences Section
@@ -73,31 +72,68 @@ struct SettingsView: View {
                 ModernSettingsRow(
                     icon: "globe",
                     title: "Language",
-                    value: "繁體中文",
                     showDivider: true
-                )
+                ) {
+                    HStack(spacing: 4) {
+                        Text("繁體中文")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(AppConstants.Colors.secondaryText)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 10))
+                            .foregroundColor(AppConstants.Colors.secondaryText)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(AppConstants.Colors.secondaryBackground)
+                    .cornerRadius(8)
+                }
                 
                 ModernSettingsRow(
                     icon: "paintbrush",
                     title: "Appearance",
-                    value: "跟隨系統",
                     showDivider: true
-                )
+                ) {
+                    HStack(spacing: 4) {
+                        Text("跟隨系統")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(AppConstants.Colors.secondaryText)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 10))
+                            .foregroundColor(AppConstants.Colors.secondaryText)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(AppConstants.Colors.secondaryBackground)
+                    .cornerRadius(8)
+                }
                 
                 ModernSettingsRow(
                     icon: "bell",
                     title: "Task Reminders",
-                    hasToggle: true,
-                    toggleValue: .constant(true),
                     showDivider: true
-                )
+                ) {
+                    Toggle("", isOn: .constant(true))
+                        .toggleStyle(SwitchToggleStyle())
+                }
                 
                 ModernSettingsRow(
                     icon: "dollarsign.square",
                     title: "Preferred Currency",
-                    value: "TWD",
                     showDivider: false
-                )
+                ) {
+                    HStack(spacing: 4) {
+                        Text("TWD")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(AppConstants.Colors.secondaryText)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 10))
+                            .foregroundColor(AppConstants.Colors.secondaryText)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(AppConstants.Colors.secondaryBackground)
+                    .cornerRadius(8)
+                }
             }
             .background(AppConstants.Colors.cardBackground)
             .overlay(
@@ -122,23 +158,32 @@ struct SettingsView: View {
                 ModernSettingsRow(
                     icon: "list.bullet",
                     title: "Total Tasks",
-                    value: "\(taskService.stats.totalTasksCreated) 個任務",
                     showDivider: true
-                )
+                ) {
+                    Text("\(taskService.stats.totalTasksCreated) 個任務")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(AppConstants.Colors.primaryText)
+                }
                 
                 ModernSettingsRow(
                     icon: "calendar",
                     title: "Tasks Completed",
-                    value: "\(taskService.stats.tasksCompleted) 已完成",
                     showDivider: true
-                )
+                ) {
+                    Text("\(taskService.stats.tasksCompleted) 已完成")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(AppConstants.Colors.primaryText)
+                }
                 
                 ModernSettingsRow(
                     icon: "chart.line.uptrend.xyaxis",
                     title: "Completion Rate",
-                    value: String(format: "%.0f%%", taskService.getCompletionRate() * 100),
                     showDivider: false
-                )
+                ) {
+                    Text(String(format: "%.0f%%", taskService.getCompletionRate() * 100))
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(AppConstants.Colors.primaryText)
+                }
             }
             .background(AppConstants.Colors.cardBackground)
             .overlay(
@@ -163,9 +208,12 @@ struct SettingsView: View {
                 ModernSettingsRow(
                     icon: "app.badge",
                     title: "Focus: Tasks",
-                    value: AppConstants.appVersion,
                     showDivider: true
-                )
+                ) {
+                    Text(AppConstants.appVersion)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AppConstants.Colors.secondaryText)
+                }
                 
                 Button(action: {
                     showingClearTasksAlert = true
@@ -173,10 +221,14 @@ struct SettingsView: View {
                     ModernSettingsRow(
                         icon: "trash",
                         title: "Clear All Tasks",
-                        titleColor: AppConstants.Colors.destructive,
                         showDivider: true
-                    )
+                    ) {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundColor(AppConstants.Colors.secondaryText)
+                    }
                 }
+                .buttonStyle(PlainButtonStyle())
                 .disabled(taskService.tasks.isEmpty)
                 
                 Button(action: {
@@ -185,10 +237,14 @@ struct SettingsView: View {
                     ModernSettingsRow(
                         icon: "arrow.clockwise",
                         title: "Reset Statistics",
-                        titleColor: AppConstants.Colors.destructive,
                         showDivider: false
-                    )
+                    ) {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundColor(AppConstants.Colors.secondaryText)
+                    }
                 }
+                .buttonStyle(PlainButtonStyle())
             }
             .background(AppConstants.Colors.cardBackground)
             .overlay(
@@ -203,73 +259,45 @@ struct SettingsView: View {
 
 // MARK: - Supporting Views
 
-struct ModernSettingsRow: View {
+struct ModernSettingsRow<Content: View>: View {
     let icon: String
     let title: String
-    let value: String?
-    let titleColor: Color
-    let hasToggle: Bool
-    let toggleValue: Binding<Bool>?
+    let content: Content
     let showDivider: Bool
     
-    init(
-        icon: String,
-        title: String,
-        value: String? = nil,
-        titleColor: Color = AppConstants.Colors.primaryText,
-        hasToggle: Bool = false,
-        toggleValue: Binding<Bool>? = nil,
-        showDivider: Bool = true
-    ) {
+    init(icon: String, title: String, showDivider: Bool = true, @ViewBuilder content: () -> Content) {
         self.icon = icon
         self.title = title
-        self.value = value
-        self.titleColor = titleColor
-        self.hasToggle = hasToggle
-        self.toggleValue = toggleValue
+        self.content = content()
         self.showDivider = showDivider
     }
     
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 16) {
-                // Icon
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .medium))
                     .foregroundColor(AppConstants.Colors.primaryText)
                     .frame(width: 24, height: 24)
+                    .background(AppConstants.Colors.secondaryBackground)
+                    .clipShape(Circle())
+                    .padding(8)
                 
-                // Title
-                Text(title)
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(titleColor)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(AppConstants.Colors.primaryText)
+                }
                 
                 Spacer()
                 
-                // Value or Toggle
-                if hasToggle, let toggleBinding = toggleValue {
-                    Toggle("", isOn: toggleBinding)
-                        .toggleStyle(SwitchToggleStyle(tint: Color.green))
-                } else if let valueText = value {
-                    HStack(spacing: 4) {
-                        Text(valueText)
-                            .font(.system(size: 16, weight: .regular))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
-                    }
-                }
+                content
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 20)
             .padding(.vertical, 16)
             
             if showDivider {
-                Rectangle()
-                    .fill(AppConstants.Colors.border.opacity(0.3))
-                    .frame(height: 0.5)
-                    .padding(.horizontal, 64) // Match reference code padding
+                Divider()
+                    .padding(.horizontal, 64)
             }
         }
     }
