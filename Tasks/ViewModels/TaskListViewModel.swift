@@ -43,21 +43,12 @@ class TaskListViewModel: ObservableObject {
     }
     
     private func updateFilteredTasks() {
+        // For the new four-section layout, we don't need traditional filtering
+        // Instead, we'll use the computed properties for each section
+        // Keep the search functionality for when search is active
         var filtered = tasks
         
-        // Apply status filter
-        switch selectedFilter {
-        case .all:
-            break
-        case .pending:
-            filtered = filtered.filter { !$0.isCompleted && !$0.isDeferred }
-        case .completed:
-            filtered = filtered.filter { $0.isCompleted }
-        case .deferred:
-            filtered = filtered.filter { $0.isDeferred }
-        }
-        
-        // Apply search filter
+        // Apply search filter when search is active
         if !searchText.isEmpty {
             filtered = filtered.filter { task in
                 task.title.localizedCaseInsensitiveContains(searchText) ||
@@ -66,6 +57,16 @@ class TaskListViewModel: ObservableObject {
         }
         
         filteredTasks = filtered
+    }
+    
+    // MARK: - Helper Methods
+    
+    var isSearchActive: Bool {
+        return !searchText.isEmpty
+    }
+    
+    var hasAnyTasks: Bool {
+        return !tasks.isEmpty
     }
     
     // MARK: - Task Actions
@@ -116,7 +117,7 @@ class TaskListViewModel: ObservableObject {
         showingAddTask = false
     }
     
-    // MARK: - Computed Properties
+    // MARK: - Computed Properties for Four-Section Layout
     
     var taskCounts: (total: Int, pending: Int, completed: Int, deferred: Int) {
         let total = tasks.count
@@ -125,6 +126,50 @@ class TaskListViewModel: ObservableObject {
         let deferred = tasks.filter { $0.isDeferred }.count
         
         return (total, pending, completed, deferred)
+    }
+    
+    // MARK: - Four-Section Task Organization
+    
+    var nextToFocusTask: Task? {
+        // Get the highest priority pending task with nearest due date
+        let pendingTasks = tasks.filter { !$0.isCompleted && !$0.isDeferred }
+        return pendingTasks.first // Already sorted by priority and due date
+    }
+    
+    var upcomingTasks: [Task] {
+        // Tasks with due dates, excluding the focused task
+        let tasksWithDates = tasks.filter { task in
+            !task.isCompleted && 
+            !task.isDeferred && 
+            task.dueDate != nil &&
+            task.id != nextToFocusTask?.id
+        }
+        return Array(tasksWithDates.prefix(3)) // Show up to 3 upcoming tasks
+    }
+    
+    var unscheduledIdeas: [Task] {
+        // Tasks without due dates, excluding completed and deferred
+        let unscheduledTasks = tasks.filter { task in
+            !task.isCompleted && 
+            !task.isDeferred && 
+            task.dueDate == nil &&
+            task.id != nextToFocusTask?.id
+        }
+        return Array(unscheduledTasks.prefix(4)) // Show up to 4 unscheduled ideas
+    }
+    
+    var doneThisWeek: [Task] {
+        // Completed tasks from this week
+        let calendar = Calendar.current
+        let now = Date()
+        let weekAgo = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+        
+        let thisWeekCompleted = tasks.filter { task in
+            task.isCompleted &&
+            task.completedAt != nil &&
+            task.completedAt! >= weekAgo
+        }
+        return Array(thisWeekCompleted.prefix(4)) // Show up to 4 recently completed
     }
 }
 
@@ -138,5 +183,40 @@ enum TaskFilter: String, CaseIterable {
     
     var displayName: String {
         return self.rawValue
+    }
+}
+
+// MARK: - Task Section Types
+
+enum TaskSection: String, CaseIterable {
+    case nextToFocus = "Next to Focus"
+    case upcoming = "Upcoming"
+    case unscheduledIdeas = "Unscheduled Ideas"
+    case doneThisWeek = "Done This Week"
+    
+    var displayName: String {
+        switch self {
+        case .nextToFocus:
+            return "專注下一步"
+        case .upcoming:
+            return "即將到來"
+        case .unscheduledIdeas:
+            return "靈感收集"
+        case .doneThisWeek:
+            return "本週完成"
+        }
+    }
+    
+    var subtitle: String {
+        switch self {
+        case .nextToFocus:
+            return "你的首要任務"
+        case .upcoming:
+            return "已安排時間的任務"
+        case .unscheduledIdeas:
+            return "待安排的想法"
+        case .doneThisWeek:
+            return "近期的成就"
+        }
     }
 }

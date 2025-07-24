@@ -9,34 +9,27 @@ import SwiftUI
 
 struct AllTasksView: View {
     @StateObject private var viewModel = TaskListViewModel()
-    @State private var showingFilterSheet = false
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Header with stats
-                headerView
-                    .padding(.horizontal, AppConstants.Spacing.pageMargin)
-                    .padding(.bottom, AppConstants.Spacing.contentSpacing)
+            ZStack {
+                // Clean white background
+                Color.white
+                    .ignoresSafeArea()
                 
-                // Filter and Search
-                filterSection
-                    .padding(.horizontal, AppConstants.Spacing.pageMargin)
-                    .padding(.bottom, AppConstants.Spacing.elementSpacing)
-                
-                // Task List
-                taskListView
+                if !viewModel.hasAnyTasks {
+                    // Empty state
+                    emptyStateView
+                } else {
+                    // Four-section layout
+                    fourSectionView
+                }
             }
-            .background(AppConstants.Colors.background)
             .navigationTitle("所有任務")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: viewModel.startAddingTask) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(AppConstants.Colors.accent)
-                    }
+                    addButton
                 }
             }
             .sheet(isPresented: $viewModel.showingAddTask) {
@@ -66,375 +59,307 @@ struct AllTasksView: View {
         .navigationViewStyle(StackNavigationViewStyle())
     }
     
-    // MARK: - Header View
+    // MARK: - Four Section View
     
-    private var headerView: some View {
-        VStack(spacing: 20) {
-            // Header Title
-            Text("Task Overview")
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(AppConstants.Colors.primaryText)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            // Task counts grid - modern card layout
-            VStack(spacing: 16) {
-                HStack(spacing: 16) {
-                    ModernStatsCard(
-                        icon: "list.bullet",
-                        title: "Total Tasks",
-                        value: "\(viewModel.taskCounts.total)",
-                        color: AppConstants.Colors.accent
-                    )
-                    
-                    ModernStatsCard(
-                        icon: "clock",
-                        title: "Pending",
-                        value: "\(viewModel.taskCounts.pending)",
-                        color: .orange
+    private var fourSectionView: some View {
+        ScrollView {
+            LazyVStack(spacing: 32) {
+                // Next to Focus Section
+                if let focusTask = viewModel.nextToFocusTask {
+                    TaskSectionView(
+                        section: .nextToFocus,
+                        tasks: [focusTask],
+                        onTaskAction: handleTaskAction
                     )
                 }
                 
-                HStack(spacing: 16) {
-                    ModernStatsCard(
-                        icon: "checkmark.circle",
-                        title: "Completed",
-                        value: "\(viewModel.taskCounts.completed)",
-                        color: .green
-                    )
-                    
-                    ModernStatsCard(
-                        icon: "pause.circle",
-                        title: "Deferred",
-                        value: "\(viewModel.taskCounts.deferred)",
-                        color: .gray
+                // Upcoming Section
+                if !viewModel.upcomingTasks.isEmpty {
+                    TaskSectionView(
+                        section: .upcoming,
+                        tasks: viewModel.upcomingTasks,
+                        onTaskAction: handleTaskAction
                     )
                 }
+                
+                // Unscheduled Ideas Section
+                if !viewModel.unscheduledIdeas.isEmpty {
+                    TaskSectionView(
+                        section: .unscheduledIdeas,
+                        tasks: viewModel.unscheduledIdeas,
+                        onTaskAction: handleTaskAction
+                    )
+                }
+                
+                // Done This Week Section
+                if !viewModel.doneThisWeek.isEmpty {
+                    TaskSectionView(
+                        section: .doneThisWeek,
+                        tasks: viewModel.doneThisWeek,
+                        onTaskAction: handleTaskAction
+                    )
+                }
+                
+                // Add some bottom padding
+                Spacer(minLength: 100)
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
         }
     }
     
-    // MARK: - Filter Section
+    // MARK: - Toolbar Items
     
-    private var filterSection: some View {
-        VStack(spacing: 16) {
-            // Modern Search Bar
-            HStack(spacing: 12) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(AppConstants.Colors.secondaryText)
-                
-                TextField("搜尋任務...", text: $viewModel.searchText)
-                    .font(.system(size: 16))
-                    .textFieldStyle(PlainTextFieldStyle())
-                
-                if !viewModel.searchText.isEmpty {
-                    Button(action: { viewModel.searchText = "" }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(AppConstants.Colors.secondaryText)
-                    }
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(AppConstants.Colors.cardBackground)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(AppConstants.Colors.border, lineWidth: 1)
-            )
-            .cornerRadius(12)
-            
-            // Modern Filter Picker
-            Picker("Filter", selection: $viewModel.selectedFilter) {
-                ForEach(TaskFilter.allCases, id: \.self) { filter in
-                    Text(filter.displayName)
-                        .tag(filter)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .background(AppConstants.Colors.cardBackground)
-            .cornerRadius(8)
-        }
-    }
-    
-    // MARK: - Task List View
-    
-    private var taskListView: some View {
-        Group {
-            if viewModel.filteredTasks.isEmpty {
-                // Empty state
-                emptyStateView
-            } else {
-                // Modern Task list
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(viewModel.filteredTasks) { task in
-                            ModernTaskRow(
-                                task: task,
-                                onToggleCompletion: {
-                                    withAnimation(AppConstants.Animation.stateChange) {
-                                        viewModel.toggleTaskCompletion(task)
-                                    }
-                                },
-                                onEdit: {
-                                    viewModel.startEditingTask(task)
-                                },
-                                onDelete: {
-                                    withAnimation(AppConstants.Animation.stateChange) {
-                                        viewModel.deleteTask(task)
-                                    }
-                                }
-                            )
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                }
-                .background(AppConstants.Colors.background)
-            }
+    private var addButton: some View {
+        Button(action: viewModel.startAddingTask) {
+            Image(systemName: "plus")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.primary)
         }
     }
     
     // MARK: - Empty State View
     
     private var emptyStateView: some View {
-        VStack(spacing: AppConstants.Spacing.contentSpacing) {
+        VStack(spacing: 24) {
             Spacer()
             
-            Image(systemName: searchTextOrFilter ? "magnifyingglass" : "list.bullet")
-                .font(.system(size: 48, weight: .light))
-                .foregroundColor(AppConstants.Colors.secondaryText)
+            Image(systemName: "checkmark.circle")
+                .font(.system(size: 64, weight: .light))
+                .foregroundColor(.gray.opacity(0.5))
             
-            Text(emptyStateTitle)
-                .font(AppConstants.Fonts.title)
-                .foregroundColor(AppConstants.Colors.primaryText)
-            
-            Text(emptyStateMessage)
-                .font(AppConstants.Fonts.secondaryContent)
-                .foregroundColor(AppConstants.Colors.secondaryText)
-                .multilineTextAlignment(.center)
-            
-            if !searchTextOrFilter {
-                Button(action: viewModel.startAddingTask) {
-                    Text("新增第一個任務")
-                        .font(AppConstants.Fonts.button)
-                        .foregroundColor(AppConstants.Colors.background)
-                        .padding(.vertical, 16)
-                        .frame(maxWidth: .infinity)
-                        .background(AppConstants.Colors.accent)
-                        .cornerRadius(AppConstants.CornerRadius.button)
-                }
-                .padding(.top, AppConstants.Spacing.contentSpacing)
+            VStack(spacing: 8) {
+                Text("歡迎使用 Tasks")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.primary)
+                
+                Text("新增你的第一個任務開始管理你的工作")
+                    .font(.system(size: 16))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
             }
             
+            Button(action: viewModel.startAddingTask) {
+                Text("新增任務")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.blue)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal, 40)
+            .padding(.top, 16)
+            
             Spacer()
         }
-        .padding(.horizontal, AppConstants.Spacing.pageMargin)
     }
     
-    // MARK: - Computed Properties
+    // MARK: - Task Action Handler
     
-    private var searchTextOrFilter: Bool {
-        !viewModel.searchText.isEmpty || viewModel.selectedFilter != .all
-    }
-    
-    private var emptyStateTitle: String {
-        if !viewModel.searchText.isEmpty {
-            return "沒有結果"
-        } else if viewModel.selectedFilter != .all {
-            return "沒有\(viewModel.selectedFilter.displayName)任務"
-        } else {
-            return "還沒有任務"
-        }
-    }
-    
-    private var emptyStateMessage: String {
-        if !viewModel.searchText.isEmpty {
-            return "試試調整搜尋條件或篩選設定"
-        } else if viewModel.selectedFilter != .all {
-            return "目前沒有\(viewModel.selectedFilter.displayName.lowercased())任務"
-        } else {
-            return "新增第一個任務開始專注工作"
+    private func handleTaskAction(_ action: TaskAction, task: Task) {
+        switch action {
+        case .toggleCompletion:
+            withAnimation(.easeInOut(duration: 0.3)) {
+                viewModel.toggleTaskCompletion(task)
+            }
+        case .edit:
+            viewModel.startEditingTask(task)
+        case .delete:
+            withAnimation(.easeInOut(duration: 0.3)) {
+                viewModel.deleteTask(task)
+            }
         }
     }
 }
 
-// MARK: - Modern Stats Card View
+// MARK: - Task Section View
 
-struct ModernStatsCard: View {
-    let icon: String
-    let title: String
-    let value: String
-    let color: Color
+struct TaskSectionView: View {
+    let section: TaskSection
+    let tasks: [Task]
+    let onTaskAction: (TaskAction, Task) -> Void
     
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(color)
-                    .frame(width: 32, height: 32)
-                    .background(color.opacity(0.1))
-                    .clipShape(Circle())
+        VStack(alignment: .leading, spacing: 16) {
+            // Section Header
+            VStack(alignment: .leading, spacing: 4) {
+                Text(section.displayName)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.primary)
                 
-                Spacer()
-                
-                Text(value)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(AppConstants.Colors.primaryText)
-            }
-            
-            HStack {
-                Text(title)
+                Text(section.subtitle)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(AppConstants.Colors.secondaryText)
-                    .multilineTextAlignment(.leading)
-                
-                Spacer()
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Tasks
+            VStack(spacing: 12) {
+                ForEach(tasks) { task in
+                    CleanTaskCard(
+                        task: task,
+                        isCompleted: task.isCompleted,
+                        showFocusStyle: section == .nextToFocus,
+                        onTaskAction: onTaskAction
+                    )
+                }
             }
         }
-        .padding(16)
-        .frame(maxWidth: .infinity)
-        .background(AppConstants.Colors.cardBackground)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(AppConstants.Colors.border, lineWidth: 1)
-        )
-        .cornerRadius(12)
     }
 }
 
-// MARK: - Modern Task Row View
+// MARK: - Clean Task Card
 
-struct ModernTaskRow: View {
+struct CleanTaskCard: View {
     let task: Task
-    let onToggleCompletion: () -> Void
-    let onEdit: () -> Void
-    let onDelete: () -> Void
+    let isCompleted: Bool
+    let showFocusStyle: Bool
+    let onTaskAction: (TaskAction, Task) -> Void
     
     var body: some View {
         HStack(spacing: 16) {
-            // Status Indicator
-            Button(action: onToggleCompletion) {
-                Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(task.isCompleted ? .green : AppConstants.Colors.border)
+            // Completion Button
+            Button(action: {
+                onTaskAction(.toggleCompletion, task)
+            }) {
+                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(isCompleted ? .green : .gray.opacity(0.6))
             }
             .buttonStyle(PlainButtonStyle())
             
             // Task Content
             VStack(alignment: .leading, spacing: 8) {
-                // Title and Priority
+                // Title
                 HStack {
                     Text(task.title)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(task.isCompleted ? AppConstants.Colors.secondaryText : AppConstants.Colors.primaryText)
-                        .strikethrough(task.isCompleted)
-                        .lineLimit(2)
+                        .font(.system(size: showFocusStyle ? 18 : 16, weight: showFocusStyle ? .semibold : .medium))
+                        .foregroundColor(isCompleted ? .secondary : .primary)
+                        .strikethrough(isCompleted)
+                        .lineLimit(showFocusStyle ? 3 : 2)
                     
                     Spacer()
                     
-                    // Priority & Status indicators
-                    HStack(spacing: 6) {
-                        if task.isDeferred {
-                            HStack(spacing: 4) {
-                                Image(systemName: "pause.circle.fill")
-                                    .font(.system(size: 10))
-                                Text("延期")
-                                    .font(.system(size: 10, weight: .medium))
-                            }
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.1))
-                            .cornerRadius(8)
-                        }
-                        
-                        if task.priority == .high || task.priority == .urgent {
-                            HStack(spacing: 4) {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .font(.system(size: 10))
-                                Text(task.priority.displayName)
-                                    .font(.system(size: 10, weight: .medium))
-                            }
-                            .foregroundColor(task.priority == .urgent ? .red : .orange)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background((task.priority == .urgent ? Color.red : Color.orange).opacity(0.1))
-                            .cornerRadius(8)
-                        }
+                    // Priority Indicator
+                    if task.priority == .high || task.priority == .urgent {
+                        Circle()
+                            .fill(task.priority == .urgent ? .red : .orange)
+                            .frame(width: 8, height: 8)
                     }
                 }
                 
-                // Description
-                if let description = task.description, !description.isEmpty {
+                // Description (only show for focus task or if exists)
+                if let description = task.description, !description.isEmpty, (showFocusStyle || description.count < 50) {
                     Text(description)
                         .font(.system(size: 14))
-                        .foregroundColor(AppConstants.Colors.secondaryText)
-                        .lineLimit(2)
+                        .foregroundColor(.secondary)
+                        .lineLimit(showFocusStyle ? 3 : 1)
                 }
                 
-                // Dates
-                HStack {
-                    if let dueDate = task.dueDate {
-                        HStack(spacing: 4) {
-                            Image(systemName: "calendar")
-                                .font(.system(size: 10))
-                            Text("到期: \(dueDate.shortDateString)")
-                                .font(.system(size: 12, weight: .medium))
-                        }
-                        .foregroundColor(
-                            dueDate.daysFromNow() <= 1 && dueDate.daysFromNow() >= 0 
-                            ? .red 
-                            : AppConstants.Colors.secondaryText
-                        )
+                // Due Date
+                if let dueDate = task.dueDate {
+                    HStack(spacing: 4) {
+                        Image(systemName: "calendar")
+                            .font(.system(size: 12))
+                        Text(formatDateString(dueDate))
+                            .font(.system(size: 13, weight: .medium))
                     }
-                    
-                    Spacer()
-                    
-                    Text("建立於 \(task.createdAt.shortDateString)")
-                        .font(.system(size: 12))
-                        .foregroundColor(AppConstants.Colors.secondaryText)
+                    .foregroundColor(daysBetween(from: Date(), to: dueDate) <= 1 ? .red : .secondary)
                 }
             }
             
-            // Action Button
+            // Context Menu Button
             Menu {
-                Button(action: onEdit) {
+                Button(action: {
+                    onTaskAction(.edit, task)
+                }) {
                     Label("編輯", systemImage: "pencil")
                 }
                 
-                Button(action: onToggleCompletion) {
+                Button(action: {
+                    onTaskAction(.toggleCompletion, task)
+                }) {
                     Label(
-                        task.isCompleted ? "標記為待辦" : "標記為完成",
-                        systemImage: task.isCompleted ? "circle" : "checkmark.circle"
+                        isCompleted ? "標記為待辦" : "標記為完成",
+                        systemImage: isCompleted ? "circle" : "checkmark.circle"
                     )
                 }
                 
                 Divider()
                 
-                Button(role: .destructive, action: onDelete) {
+                Button(role: .destructive, action: {
+                    onTaskAction(.delete, task)
+                }) {
                     Label("刪除", systemImage: "trash")
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(AppConstants.Colors.secondaryText)
-                    .frame(width: 24, height: 24)
+                    .font(.system(size: 16))
+                    .foregroundColor(.secondary)
+                    .frame(width: 32, height: 32)
             }
         }
         .padding(16)
-        .background(AppConstants.Colors.cardBackground)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white)
+                .shadow(
+                    color: .black.opacity(showFocusStyle ? 0.08 : 0.04),
+                    radius: showFocusStyle ? 8 : 4,
+                    x: 0,
+                    y: showFocusStyle ? 4 : 2
+                )
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(AppConstants.Colors.border, lineWidth: 1)
+                .stroke(
+                    showFocusStyle ? Color.blue.opacity(0.2) : Color.clear,
+                    lineWidth: showFocusStyle ? 1 : 0
+                )
         )
-        .cornerRadius(12)
     }
+}
+
+// MARK: - Task Action Enum
+
+enum TaskAction {
+    case toggleCompletion
+    case edit
+    case delete
+}
+
+// MARK: - Helper Functions
+
+private func formatDateString(_ date: Date) -> String {
+    let formatter = DateFormatter()
+    let calendar = Calendar.current
+    
+    if calendar.isDateInToday(date) {
+        return "今天"
+    } else if calendar.isDateInTomorrow(date) {
+        return "明天"
+    } else if calendar.isDate(date, equalTo: Date(), toGranularity: .weekOfYear) {
+        formatter.dateFormat = "EEEE"
+        return formatter.string(from: date)
+    } else {
+        formatter.dateFormat = "M/d"
+        return formatter.string(from: date)
+    }
+}
+
+private func daysBetween(from startDate: Date, to endDate: Date) -> Int {
+    let calendar = Calendar.current
+    let start = calendar.startOfDay(for: startDate)
+    let end = calendar.startOfDay(for: endDate)
+    let components = calendar.dateComponents([.day], from: start, to: end)
+    return components.day ?? 0
 }
 
 // MARK: - Preview
 
 #Preview {
     AllTasksView()
+        .preferredColorScheme(.light)
 }
