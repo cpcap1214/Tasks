@@ -17,21 +17,32 @@ struct AllTasksView: View {
                 Color.white
                     .ignoresSafeArea()
                 
-                if !viewModel.hasAnyTasks {
-                    // Empty state
-                    emptyStateView
-                } else {
-                    // Four-section layout
-                    fourSectionView
+                VStack(spacing: 24) {
+                    // Header with Add Button
+                    HStack {
+                        Spacer()
+                        
+                        Text("所有任務")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                        
+                        addButton
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
+                    
+                    if !viewModel.hasAnyTasks {
+                        // Empty state
+                        emptyStateContent
+                    } else {
+                        // Four-section layout
+                        fourSectionContent
+                    }
                 }
             }
-            .navigationTitle("所有任務")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    addButton
-                }
-            }
+            .navigationBarHidden(true)
             .sheet(isPresented: $viewModel.showingAddTask) {
                 AddTaskView { title, description, priority, dueDate in
                     viewModel.addTask(
@@ -59,9 +70,9 @@ struct AllTasksView: View {
         .navigationViewStyle(StackNavigationViewStyle())
     }
     
-    // MARK: - Four Section View
+    // MARK: - Four Section Content
     
-    private var fourSectionView: some View {
+    private var fourSectionContent: some View {
         ScrollView {
             LazyVStack(spacing: 32) {
                 // Next to Focus Section
@@ -119,12 +130,10 @@ struct AllTasksView: View {
         }
     }
     
-    // MARK: - Empty State View
+    // MARK: - Empty State Content
     
-    private var emptyStateView: some View {
+    private var emptyStateContent: some View {
         VStack(spacing: 24) {
-            Spacer()
-            
             Image(systemName: "checkmark.circle")
                 .font(.system(size: 64, weight: .light))
                 .foregroundColor(.gray.opacity(0.5))
@@ -295,7 +304,7 @@ struct TaskCard: View {
                         Text(formatDateString(dueDate))
                             .font(.system(size: 13, weight: .medium))
                     }
-                    .foregroundColor(daysBetween(from: Date(), to: dueDate) <= 1 ? .red : .secondary)
+                    .foregroundColor(daysBetween(from: Date(), to: dueDate) < 0 ? .red : .secondary)
                 }
             }
             

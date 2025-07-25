@@ -27,7 +27,7 @@ struct SampleData {
             dueDate: Date()
         ))
         
-        // Normal priority tasks
+        // Normal priority tasks - one with due date, one without
         tasks.append(Task(
             title: "Schedule team meeting",
             description: "Plan next sprint activities and assign tasks",
@@ -35,14 +35,20 @@ struct SampleData {
             dueDate: Calendar.current.date(byAdding: .day, value: 5, to: Date())
         ))
         
+        // Task without due date - will go to Unscheduled Ideas
         tasks.append(Task(
             title: "Update documentation",
             description: "Add new API endpoints to the developer docs",
-            priority: .normal,
-            dueDate: Calendar.current.date(byAdding: .day, value: 7, to: Date())
+            priority: .normal
         ))
         
-        // Low priority task
+        // More unscheduled ideas
+        tasks.append(Task(
+            title: "Learn SwiftUI animations",
+            description: "Explore advanced animation techniques for better UX",
+            priority: .low
+        ))
+        
         tasks.append(Task(
             title: "Organize desktop files",
             description: "Clean up and organize all the files on desktop",

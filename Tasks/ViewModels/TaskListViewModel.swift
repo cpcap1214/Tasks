@@ -144,7 +144,7 @@ class TaskListViewModel: ObservableObject {
             task.dueDate != nil &&
             task.id != nextToFocusTask?.id
         }
-        return Array(tasksWithDates.prefix(3)) // Show up to 3 upcoming tasks
+        return Array(tasksWithDates) // Show up to 3 upcoming tasks
     }
     
     var unscheduledIdeas: [Task] {
@@ -155,7 +155,7 @@ class TaskListViewModel: ObservableObject {
             task.dueDate == nil &&
             task.id != nextToFocusTask?.id
         }
-        return Array(unscheduledTasks.prefix(4)) // Show up to 4 unscheduled ideas
+        return Array(unscheduledTasks) // Show up to 4 unscheduled ideas
     }
     
     var deferredTasks: [Task] {
@@ -163,7 +163,7 @@ class TaskListViewModel: ObservableObject {
         let deferred = tasks.filter { task in
             task.isDeferred
         }
-        return Array(deferred.prefix(4)) // Show up to 4 deferred tasks
+        return Array(deferred) // Show up to 4 deferred tasks
     }
     
     var allIncompleteTasks: [Task] {

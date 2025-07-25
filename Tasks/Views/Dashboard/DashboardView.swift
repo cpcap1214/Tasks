@@ -187,7 +187,7 @@ struct SwipeableFocusCard: View {
                         .fill(dragOffset.width > 30 ? 
                               (dragOffset.width > 0 ? .green : .orange) : 
                               .clear)
-                        .opacity(min(abs(dragOffset.width) / 100, 0.9))
+                        .opacity(min(abs(dragOffset.width) / 100.0, 0.9))
                         .animation(.easeOut(duration: 0.1), value: dragOffset.width)
                 )
             }

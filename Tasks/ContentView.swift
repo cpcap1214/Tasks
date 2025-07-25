@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab = 0
-    @State private var showingOnboarding = false
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -58,29 +57,10 @@ struct ContentView: View {
             
             UITabBar.appearance().standardAppearance = appearance
             UITabBar.appearance().scrollEdgeAppearance = appearance
-            
-            // Check if first launch
-            checkFirstLaunch()
-        }
-        .fullScreenCover(isPresented: $showingOnboarding) {
-            OnboardingView {
-                showingOnboarding = false
-            }
         }
     }
     
-    // MARK: - Private Methods
-    
-    private func checkFirstLaunch() {
-        let hasLaunchedBefore = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.hasLaunchedBefore)
-        
-        if !hasLaunchedBefore {
-            // Small delay to ensure the UI is fully loaded
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                showingOnboarding = true
-            }
-        }
-    }
+
 }
 
 #Preview {
