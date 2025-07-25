@@ -223,18 +223,4 @@ enum TaskSection: String, CaseIterable {
         }
     }
     
-    var subtitle: String {
-        switch self {
-        case .nextToFocus:
-            return "你的首要任務"
-        case .upcoming:
-            return "已安排時間的任務"
-        case .unscheduledIdeas:
-            return "待安排的想法"
-        case .deferred:
-            return "暫時延期的任務"
-        case .doneThisWeek:
-            return "近期的成就"
-        }
-    }
 }

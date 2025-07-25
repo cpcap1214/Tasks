@@ -11,6 +11,7 @@ struct SettingsView: View {
     @StateObject private var taskService = TaskService.shared
     @State private var showingResetAlert = false
     @State private var showingClearTasksAlert = false
+    @State private var showingCompletedTasks = false
     @AppStorage("taskRemindersEnabled") private var taskRemindersEnabled = true
     
     var body: some View {
@@ -18,7 +19,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: 40) {
                     // Header
-                    Text("Settings")
+                    Text("設定")
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(AppConstants.Colors.primaryText)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -57,6 +58,9 @@ struct SettingsView: View {
             } message: {
                 Text("這將永久刪除所有任務，此操作無法復原。")
             }
+            .sheet(isPresented: $showingCompletedTasks) {
+                CompletedTasksView()
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
@@ -65,7 +69,7 @@ struct SettingsView: View {
     
     private var preferencesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Preferences")
+            Text("偏好設定")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundColor(AppConstants.Colors.primaryText)
                 .padding(.horizontal, 16)
@@ -108,7 +112,7 @@ struct SettingsView: View {
     
     private var dataOverviewSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Data Overview")
+            Text("資料總覽")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundColor(AppConstants.Colors.primaryText)
                 .padding(.horizontal, 16)
@@ -124,15 +128,26 @@ struct SettingsView: View {
                         .foregroundColor(AppConstants.Colors.primaryText)
                 }
                 
-                ModernSettingsRow(
-                    icon: "checkmark.circle",
-                    title: "已完成任務",
-                    showDivider: true
-                ) {
-                    Text("\(taskService.stats.tasksCompleted) 個")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(AppConstants.Colors.primaryText)
+                Button(action: {
+                    showingCompletedTasks = true
+                }) {
+                    ModernSettingsRow(
+                        icon: "checkmark.circle",
+                        title: "已完成任務",
+                        showDivider: true
+                    ) {
+                        HStack(spacing: 8) {
+                            Text("\(taskService.stats.tasksCompleted) 個")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(AppConstants.Colors.primaryText)
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12))
+                                .foregroundColor(AppConstants.Colors.secondaryText)
+                        }
+                    }
                 }
+                .buttonStyle(PlainButtonStyle())
                 
                 ModernSettingsRow(
                     icon: "chart.line.uptrend.xyaxis",
@@ -160,7 +175,7 @@ struct SettingsView: View {
     
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("About")
+            Text("關於")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundColor(AppConstants.Colors.primaryText)
                 .padding(.horizontal, 16)
@@ -168,7 +183,7 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 ModernSettingsRow(
                     icon: "app.badge",
-                    title: "Focus: Tasks",
+                    title: "專注：任務管理",
                     showDivider: true
                 ) {
                     Text(AppConstants.appVersion)

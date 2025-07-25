@@ -82,7 +82,7 @@ struct TaskCardView: View {
                                 .font(.system(size: 16, weight: .semibold))
                         }
                         
-                        Text("Done")
+                        Text("完成")
                             .font(AppConstants.Fonts.button)
                     }
                     .foregroundColor(AppConstants.Colors.background)
@@ -101,7 +101,7 @@ struct TaskCardView: View {
                         Image(systemName: "clock")
                             .font(.system(size: 16, weight: .medium))
                         
-                        Text("Defer")
+                        Text("延期")
                             .font(AppConstants.Fonts.button)
                     }
                     .foregroundColor(AppConstants.Colors.primaryText)

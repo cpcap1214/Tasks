@@ -11,7 +11,7 @@ struct AppConstants {
     
     // MARK: - App Info
     
-    static let appName = "Focus"
+    static let appName = "專注"
     static let appVersion = "1.0.0"
     
     // MARK: - Design System (Following DESIGN.md)
@@ -90,9 +90,9 @@ struct AppConstants {
     // MARK: - Tab Bar
     
     enum TabItem: String, CaseIterable {
-        case dashboard = "Dashboard"
-        case allTasks = "All Tasks"
-        case settings = "Settings"
+        case dashboard = "主控台"
+        case allTasks = "所有任務"
+        case settings = "設定"
         
         var systemImage: String {
             switch self {

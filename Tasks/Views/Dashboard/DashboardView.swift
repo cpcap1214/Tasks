@@ -14,7 +14,7 @@ struct DashboardView: View {
         VStack(spacing: 0) {
             // Header - 簡潔的應用標題
             VStack(spacing: AppConstants.Spacing.elementSpacing) {
-                Text("Focus")
+                Text("專注")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(AppConstants.Colors.primaryText)
                     .padding(.top, 60)

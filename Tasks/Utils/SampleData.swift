@@ -13,60 +13,60 @@ struct SampleData {
         
         // High priority tasks
         tasks.append(Task(
-            title: "Complete project wireframes",
-            description: "Design the main screens for the mobile app including dashboard, task list, and settings",
+            title: "完成項目線框圖",
+            description: "設計手機應用的主要畫面，包括主控台、任務列表和設定頁面",
             priority: .high,
             dueDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())
         ))
         
         // Urgent task
         tasks.append(Task(
-            title: "Review quarterly reports",
-            description: "Go through Q4 financial reports and prepare summary",
+            title: "檢閱季度報告",
+            description: "檢閱第四季財務報告並準備摘要",
             priority: .urgent,
             dueDate: Date()
         ))
         
         // Normal priority tasks - one with due date, one without
         tasks.append(Task(
-            title: "Schedule team meeting",
-            description: "Plan next sprint activities and assign tasks",
+            title: "安排團隊會議",
+            description: "規劃下一個衝刺週期的活動並分配任務",
             priority: .normal,
             dueDate: Calendar.current.date(byAdding: .day, value: 5, to: Date())
         ))
         
         // Task without due date - will go to Unscheduled Ideas
         tasks.append(Task(
-            title: "Update documentation",
-            description: "Add new API endpoints to the developer docs",
+            title: "更新文檔",
+            description: "在開發者文檔中新增 API 端點",
             priority: .normal
         ))
         
         // More unscheduled ideas
         tasks.append(Task(
-            title: "Learn SwiftUI animations",
-            description: "Explore advanced animation techniques for better UX",
+            title: "學習 SwiftUI 動畫",
+            description: "探索進階動畫技巧以提升使用者體驗",
             priority: .low
         ))
         
         tasks.append(Task(
-            title: "Organize desktop files",
-            description: "Clean up and organize all the files on desktop",
+            title: "整理桌面檔案",
+            description: "清理並整理桌面上的所有檔案",
             priority: .low
         ))
         
         // Add some completed tasks
         var completedTask1 = Task(
-            title: "Setup development environment",
-            description: "Install Xcode, configure git, and setup project structure",
+            title: "設置開發環境",
+            description: "安裝 Xcode、配置 git 並設置項目結構",
             priority: .high
         )
         completedTask1.markAsCompleted()
         tasks.append(completedTask1)
         
         var completedTask2 = Task(
-            title: "Research competitor apps",
-            description: "Study similar productivity apps in the App Store",
+            title: "研究競爭對手應用",
+            description: "研究 App Store 中類似的生產力應用",
             priority: .normal
         )
         completedTask2.markAsCompleted()
@@ -74,8 +74,8 @@ struct SampleData {
         
         // Add a deferred task
         var deferredTask = Task(
-            title: "Plan vacation",
-            description: "Research destinations and book flights",
+            title: "計劃假期",
+            description: "研究目的地並預訂機票",
             priority: .low,
             dueDate: Calendar.current.date(byAdding: .month, value: 2, to: Date())
         )

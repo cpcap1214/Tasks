@@ -102,14 +102,6 @@ struct AllTasksView: View {
                     )
                 }
                 
-                // Done This Week Section
-                if !viewModel.doneThisWeek.isEmpty {
-                    TaskSectionView(
-                        section: .doneThisWeek,
-                        tasks: viewModel.doneThisWeek,
-                        onTaskAction: handleTaskAction
-                    )
-                }
                 
                 
                 // Add some bottom padding
@@ -198,16 +190,10 @@ struct TaskSectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Section Header
-            VStack(alignment: .leading, spacing: 4) {
-                Text(section.displayName)
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.primary)
-                
-                Text(section.subtitle)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Text(section.displayName)
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
             // Tasks
             VStack(spacing: 12) {
