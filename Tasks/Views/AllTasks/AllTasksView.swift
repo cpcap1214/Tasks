@@ -18,20 +18,12 @@ struct AllTasksView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 24) {
-                    // Header with Add Button
-                    HStack {
-                        Spacer()
-                        
-                        Text("所有任務")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
-                        
-                        addButton
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
+                    // Header
+                    Text("所有任務")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, 10)
                     
                     if !viewModel.hasAnyTasks {
                         // Empty state
@@ -39,6 +31,19 @@ struct AllTasksView: View {
                     } else {
                         // Four-section layout
                         fourSectionContent
+                    }
+                }
+                
+                // Floating Action Button
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        
+                        floatingAddButton
+                            .padding(.trailing, 20)
+                            .padding(.bottom, 20)
                     }
                 }
             }
@@ -112,14 +117,25 @@ struct AllTasksView: View {
         }
     }
     
-    // MARK: - Toolbar Items
+    // MARK: - Floating Action Button
     
-    private var addButton: some View {
+    private var floatingAddButton: some View {
         Button(action: viewModel.startAddingTask) {
             Image(systemName: "plus")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.primary)
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(width: 56, height: 56)
+                .background(Color.blue)
+                .clipShape(Circle())
+                .shadow(
+                    color: Color.blue.opacity(0.3),
+                    radius: 8,
+                    x: 0,
+                    y: 4
+                )
         }
+        .scaleEffect(1.0)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.showingAddTask)
     }
     
     // MARK: - Empty State Content
@@ -141,20 +157,6 @@ struct AllTasksView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
-            
-            Button(action: viewModel.startAddingTask) {
-                Text("新增任務")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.blue)
-                    .cornerRadius(12)
-            }
-            .padding(.horizontal, 40)
-            .padding(.top, 16)
-            
-            Spacer()
         }
     }
     
