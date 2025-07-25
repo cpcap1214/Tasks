@@ -42,8 +42,8 @@ struct AllTasksView: View {
                         Spacer()
                         
                         floatingAddButton
-                            .padding(.trailing, 20)
-                            .padding(.bottom, 20)
+                            .padding(.trailing, 30)
+                            .padding(.bottom, 40)
                     }
                 }
             }
@@ -125,10 +125,10 @@ struct AllTasksView: View {
                 .font(.system(size: 24, weight: .semibold))
                 .foregroundColor(.white)
                 .frame(width: 56, height: 56)
-                .background(Color.blue)
+                .background(Color.black)
                 .clipShape(Circle())
                 .shadow(
-                    color: Color.blue.opacity(0.3),
+                    color: Color.black.opacity(0.3),
                     radius: 8,
                     x: 0,
                     y: 4
